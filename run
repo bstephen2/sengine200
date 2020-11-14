@@ -1,0 +1,7 @@
+#!/bin/bash
+set -x
+sengine200
+set -
+RC=$?
+echo Return code = ${RC}
+

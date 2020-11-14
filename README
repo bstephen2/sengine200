@@ -1,0 +1,20 @@
+sengine200
+(c) 2020-2021, Brian Stephenson
+brian@bstephen.me.uk
+
+A threaded directmate testing program written in a combination of C and X86 assembler. There will be
+versions for WIN32, WIN64, LINUX32 and LINX64.
+
+External libraries used are:
+
+UTHASH
+UTLIST
+UTSTRING
+Openmp
+An MD5 library
+An XML library
+A memory pool library
+
+The C compiler used will be GCC
+The assembler used will be NASM
+
