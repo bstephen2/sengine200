@@ -1,0 +1,14 @@
+#!/bin/bash
+set -x
+valgrind --leak-check=full \
+sengine200	--kings=c7a8 \
+				--gbr=1111.11 \
+				--pos=e1d1b1e6b6a7 \
+				--moves=1 \
+				--actual \
+				--sols=5
+RC=$?
+set -
+echo "Return code = $RC"
+exit 0
+

@@ -13,6 +13,7 @@
 #define SENGINE_PROG_VERSION "2.00"
 #define SENGINE_PROG_AUTHOR "Brian Stephenson"
 #define SENGINE_PROG_YEARS "2020-2021"
+#define SENGINE_ERROR_PREFIX "sengine200: "
 
 typedef unsigned char uchar;
 

@@ -1,0 +1,15 @@
+#!/bin/bash
+set -x
+sengine200	--kings=h6e8 \
+				--gbr=1813.35 \
+				--pos=h3b5f1a8h8c4a1a6g5d2a7d7f7h7c2 \
+				--moves=3 \
+				--castling=qk \
+				--fleck \
+				--threats=ALL \
+				--actual
+RC=$?
+set -
+echo "Return code = $RC"
+exit 0
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -x
+sengine200	--kings=f8d4 \
+				--gbr=4252.85 \
+				--pos=a1b8h4b1a8d8f4f7b2d7a6e6a5f5c4d2f2e7f6c5b3a2 \
+				--moves=4 \
+				--actual
+RC=$?
+set -
+echo "Return code = $RC"
+exit 0
+

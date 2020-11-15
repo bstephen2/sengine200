@@ -9,17 +9,22 @@
 
 #include <stdio.h>
 #include <getopt.h>
+#include <string.h>
 #include "sengine.h"
 
-extern uchar* g_kings;
-extern uchar* g_gbr;
-extern uchar* g_pos;
-extern uchar* g_castling;
-extern uchar* g_ep;
-extern uchar g_moves;
-extern uchar g_sols;
-extern uchar g_refuts;
-extern uchar g_threats;
+extern char* g_kings;
+extern char* g_gbr;
+extern char* g_pos;
+extern char* g_castling;
+extern char* g_ep;
+extern char* g_st_moves;
+extern char* g_st_sols;
+extern char* g_st_refuts;
+extern char* g_st_threats;
+extern char g_moves;
+extern char g_sols;
+extern char g_refuts;
+extern char g_threats;
 extern bool	g_hash;
 extern bool	g_help;
 extern bool	g_set;
@@ -31,6 +36,16 @@ extern bool	g_fleck;
 extern bool	g_meson;
 extern bool	g_classify;
 extern bool	g_version;
+
+int val_kings(char*);
+int val_gbr(char*);
+int val_pos(char*);
+int val_castling(char*);
+int val_ep(char*);
+int val_moves(char*);
+int val_sols(char*);
+int val_refuts(char*);
+int val_threats(char*);
 
 void do_usage(void)
 {
@@ -66,7 +81,7 @@ int process_args(int argc, char* argv[])
     int opt;
 
     struct option long_options[] = {
-        {"kings",        no_argument,       0, 'a' },
+        {"kings",        required_argument, 0, 'a' },
         {"gbr",          required_argument, 0, 'b' },
         {"pos",          required_argument, 0, 'c' },
         {"moves",        required_argument, 0, 'd' },
@@ -92,80 +107,142 @@ int process_args(int argc, char* argv[])
     while ((opt = getopt_long_only(argc, argv, "", long_options, &option_index)) != -1) {
 
         switch (opt) {
-        case 'a':
+        case 'a':			// --kings
+            g_kings = strdup(optarg);
             break;
 
-        case 'b':
+        case 'b':			// --gbr
+            g_gbr = strdup(optarg);
             break;
 
-        case 'c':
+        case 'c':			// --pos
+            g_pos = strdup(optarg);
             break;
 
-        case 'd':
+        case 'd':			// --moves
+            g_st_moves = strdup(optarg);
             break;
 
-        case 'e':
+        case 'e':			// --sols
+            g_st_sols = strdup(optarg);
             break;
 
-        case 'f':
+        case 'f':			// --castling
+            g_castling = strdup(optarg);
             break;
 
-        case 'g':
+        case 'g':			//	--ep
+            g_ep = strdup(optarg);
             break;
 
-        case 'h':
+        case 'h':			// --refuts
+            g_st_refuts = strdup(optarg);
             break;
 
-        case 'i':
+        case 'i':			// --threats
+            g_st_threats = strdup(optarg);
             break;
 
-        case 'j':
+        case 'j':			// --hash
             g_hash = true;
             break;
 
-        case 'k':
+        case 'k':			// --help
             g_help = true;
             break;
 
-        case 'l':
+        case 'l':			// --set
             g_set = true;
             break;
 
-        case 'm':
+        case 'm':			// --tries
             g_tries = true;
             break;
 
-        case 'n':
+        case 'n':			// --trivialtries
             g_trivtries = true;
             break;
 
-        case 'o':
+        case 'o':			// --actual
             g_actual = true;
             break;
 
-        case 'p':
+        case 'p':			// --shortvars
             g_shortvars = true;
             break;
 
-        case 'q':
+        case 'q':			// --fleck
             g_fleck = true;
             break;
 
-        case 'r':
+        case 'r':			// --meson
             g_meson = true;
             break;
 
-        case 's':
+        case 's':			// --classify
             g_classify = true;
             break;
 
-        case 't':
+        case 't':			// --version
             g_version = true;
+            break;
+
+        case '?':			// Error
+            rc = 1;
             break;
 
         default:
             break;
         }
+    }
+
+    if (rc != 0) {
+        do_usage();
+    } else {
+        if ((g_help == true) || (g_version == true)) {
+            if (g_version == true) {
+                fprintf(stderr, "%s (v. %s)\n", SENGINE_PROG_NAME, SENGINE_PROG_VERSION);
+                fprintf(stderr, "(c) %s, %s\n", SENGINE_PROG_YEARS, SENGINE_PROG_AUTHOR);
+            }
+
+            if (g_help == true) {
+                do_usage();
+            }
+
+            rc = 1;
+				return rc;
+        }
+    }
+
+    if (rc == 0) {
+        if (g_kings == NULL) {
+            fprintf(stderr, "%s--kings is mandatory\n", SENGINE_ERROR_PREFIX);
+				rc = 1;
+        }
+
+        if (g_gbr == NULL) {
+            fprintf(stderr, "%s--gbr is mandatory\n", SENGINE_ERROR_PREFIX);
+				rc = 1;
+        }
+
+        if (g_pos == NULL) {
+            fprintf(stderr, "%s--pos is mandatory\n", SENGINE_ERROR_PREFIX);
+				rc = 1;
+        }
+    }
+
+    rc += val_kings(g_kings);
+    rc += val_gbr(g_gbr);
+    rc += val_pos(g_pos);
+    rc += val_castling(g_castling);
+    rc += val_ep(g_ep);
+    rc += val_moves(g_st_moves);
+    rc += val_sols(g_st_sols);
+    rc += val_refuts(g_st_refuts);
+    rc += val_threats(g_st_threats);
+
+    if (rc != 0) {
+        fputs("\nTry sengine200 --help for guidance\n", stderr);
     }
 
     return rc;
