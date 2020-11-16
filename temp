@@ -1,21 +1,4 @@
-					push			esi
-					mov			esi, [ptr_str]
-					test			esi, esi
-					jz				vr_98
-					lodsw
-					test			ah, ah
-					jnz			vr_97
-					sub			al, '0'
-					cmp			al, 0
-					jl				vr_97
-					cmp			al, 9
-					jg				vr_97
-					mov			[g_refuts], al
-              	jmp			vr_98 
-vr_97:			equ			$
-					mov			eax, 1
-					jmp			vr_99
-vr_98:			equ			$					
-					xor			eax, eax
-vr_99:			equ			$					
-					pop			esi
+					global		g_st_moves
+					global		g_st_sols
+					global		g_st_refuts
+					global		g_st_threats

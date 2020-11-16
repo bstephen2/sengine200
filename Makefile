@@ -48,7 +48,7 @@ tags:	${CMODS} ${CHDS}
 	ctags ${CMODS} ${CHDS}
 
 clean:
-	rm ${COBJS} ${AOBJS} ${CASMS} ${EXE} *orig *lst tags
+	rm ${COBJS} ${AOBJS} ${CASMS} ${EXE} *orig *lst *a86 tags
 
 tidy:
 	${IND} ${INDOPTS} ${CMODS} ${CHDS}
@@ -57,4 +57,4 @@ touch:
 	touch ${CMODS} ${CHDS} ${AMODS}
 	
 count:
-	wc -l ${CMODS} ${CHDS} ${AMODS} | sort -b -n	
+	wc -l ${CMODS} ${CHDS} ${AMODS} ${AHDS} | sort -b -n	

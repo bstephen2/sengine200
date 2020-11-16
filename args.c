@@ -37,9 +37,9 @@ extern bool	g_meson;
 extern bool	g_classify;
 extern bool	g_version;
 
-int val_kings(char*);
-int val_gbr(char*);
-int val_pos(char*);
+int val_kings();
+int val_gbr();
+int val_pos();
 int val_castling(char*);
 int val_ep(char*);
 int val_moves(char*);
@@ -188,7 +188,7 @@ int process_args(int argc, char* argv[])
             break;
 
         case '?':			// Error
-            rc = 1;
+            rc++;
             break;
 
         default:
@@ -231,9 +231,9 @@ int process_args(int argc, char* argv[])
         }
     }
 
-    rc += val_kings(g_kings);
-    rc += val_gbr(g_gbr);
-    rc += val_pos(g_pos);
+	 if (g_kings != NULL) rc += val_kings();
+    if (g_gbr != NULL) rc += val_gbr();
+    if (g_pos != NULL) rc += val_pos();
     rc += val_castling(g_castling);
     rc += val_ep(g_ep);
     rc += val_moves(g_st_moves);
