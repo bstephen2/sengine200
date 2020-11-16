@@ -31,6 +31,7 @@ bad_threats:	db				'sengine200: --threats=%s is invalid', 0
 					extern		g_kings
 					extern		g_gbr
 					extern		g_pos
+					extern		g_ep
 					extern		g_refuts
 					extern		g_sols
 					extern		g_moves
@@ -139,7 +140,7 @@ val_castling:	equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
 					enter       %$localsize, 0
-					SAVE			esi
+					SAVE			esi, ebx
 					mov			esi, [g_castling]
 					test			esi, esi
 					jz				vc_97					;	A null pointer is valid
@@ -149,14 +150,29 @@ val_castling:	equ         $
 					add			esp, 4
 					test			eax, eax
 					jz				vc_99					;	An empty string is valid
-					mov			ecx, eax
+					mov			ebx, eax
 
 					push			cast
 					push			esi
 					call			strspn
 					add			esp, 8
-					cmp			eax, ecx
+					cmp			eax, ebx
 					jne			vc_98					;	Invalid characters present
+
+vc_00:			equ			$					
+					lodsb
+					cmp			al, 0
+					je				vc_97
+					mov			edx, esi
+
+vc_01:			equ			$					
+					mov			ah, [edx]
+					cmp			ah, 0
+					je				vc_00
+					cmp			ah, al
+					je				vc_98					;	Repeated character
+					add			edx, 1
+					jmp			vc_01
 
 vc_97:			equ			$					
 					xor			eax, eax
@@ -173,7 +189,7 @@ vc_98:			equ			$
 					mov			eax, 1
 
 vc_99:			equ			$
-					RESTORE		esi
+					RESTORE		esi, ebx
 					leave
 					ret
 					%pop
@@ -189,8 +205,41 @@ val_ep:			equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
 					enter       %$localsize, 0
-               
+					SAVE			esi
+					mov			esi, [g_ep]
+					test			esi, esi
+					jz				vp_99					;	Null pointer is ok
+					lodsb
+					cmp			al, 0
+					je				vp_99					;	Empty string is ok
+					cmp			al, 'a'
+					jb				vp_98
+					cmp			al, 'h'
+					jg				vp_98
+					lodsb									;	First character valid
+					cmp			al, '5'
+					jne			vp_98					;	Second character not valid
+					lodsb
+					cmp			al, 0
+					jne			vp_98					;	Not end of string - invalid
+					jmp			vp_99
+
+vp_98:			equ			$
+					mov			esi, [g_ep]
+					push			esi
+					mov			esi, bad_ep
+					push			esi
+					push			dword [stderr]
+					call			fprintf
+					add			esp, 12
+					mov			eax, 1
+					jmp			vp_100
+
+vp_99:			equ			$
 					xor			eax, eax
+
+vp_100:			equ			$
+					RESTORE		esi
 					leave
 					ret
 					%pop
