@@ -54,7 +54,7 @@ tidy:
 	${IND} ${INDOPTS} ${CMODS} ${CHDS}
 
 touch:
-	touch ${CMODS} ${CHDS} ${AMODS}
+	touch ${CMODS} ${CHDS} ${AMODS} ${AHDS}
 	
 count:
 	wc -l ${CMODS} ${CHDS} ${AMODS} ${AHDS} | sort -b -n	
