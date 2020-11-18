@@ -12,16 +12,21 @@
 					[section    .data]
 					;  Initialised data.
 
+TH_NONE			db				'NONE', 0
+TH_ALL			db				'ALL', 0
+TH_SHORTEST		db				'SHORTEST', 0
 cast				db				'KQkq', 0
 bad_moves:		db				'sengine200: --moves=%s is invalid', 0
 bad_sols:		db				'sengine200: --sols=%s is invalid', 0
 bad_refuts:		db				'sengine200: --refuts=%s is invalid', 0
 bad_kings:		db				'sengine200: --kings=%s is invalid', 0
 bad_gbr:			db				'sengine200: --gbr=%s is invalid', 0
-bad_pos:			db				'sengine200: --pos=%is is invalid', 0
+bad_pos:			db				'sengine200: --pos=%s is invalid', 0
 bad_castling:	db				'sengine200: --castling=%s is invalid', 0
 bad_ep:			db				'sengine200: --ep=%s is invalid', 0
 bad_threats:	db				'sengine200: --threats=%s is invalid', 0
+bad_gp			db				'sengine200: --gbr and --pos not compatible', 0
+bad_vkp			db				'sengine200: square in --kings duplicated in --pos', 0
 
 					[section 	.bss]
 					;  Uninitialised data.
@@ -45,6 +50,8 @@ bad_threats:	db				'sengine200: --threats=%s is invalid', 0
 					extern		strlen
 					extern		strspn
 					extern		fprintf
+					extern		strcmp
+					extern		fputs
 
 					global		val_kings
 					global		val_gbr
@@ -55,6 +62,8 @@ bad_threats:	db				'sengine200: --threats=%s is invalid', 0
 					global		val_sols
 					global		val_refuts
 					global		val_threats
+					global		val_gbr_pos
+					global		val_kings_pos
 
 ;
 ;	val_squares
@@ -70,7 +79,70 @@ val_squares:	equ         $
 					%assign     %$localsize 0
 					%arg        ptr_str:dword
 					enter       %$localsize, 0
+					SAVE			esi
+					mov			esi, [ptr_str]
+;
+;	Check for invalid null pointer
+;
+					test			esi, esi
+					jz				vsq_98
+;
+;	Check for invalid zero-length string
+;
+					mov			al, [esi]
+					cmp			al, 0
+					je				vsq_98
+;
+;	Check all characters
+;
+vsq_00:			equ			$
+					lodsw
+					cmp			al, 0				;	end of string?
+					je				vsq_01
+					cmp			ah, 0				;	string of odd length?
+					je				vsq_98
+					cmp			al, 'a'
+					jb				vsq_98
+					cmp			al, 'h'
+					ja				vsq_98
+					cmp			ah, '1'
+					jb				vsq_98
+					cmp			ah, '8'
+					ja				vsq_98
+					jmp			vsq_00
+
+;
+;	Check for repeated squares
+;
+vsq_01:			equ			$
+					mov			esi, [ptr_str]
+
+vsq_02:			equ			$					
+					mov			al, [esi + 2]
+					cmp			al, 0				;	final square?
+					je				vsq_97
+					lodsw
+					mov			edx, esi
+
+vsq_03:			equ			$					
+					mov			cx, [edx]
+					cmp			ax, cx			;	repeated square?
+					je				vsq_98
+					add			edx, 2
+					mov			cl, [edx]
+					cmp			cl, 0				;	end of string?
+					jne			vsq_03
+					jmp			vsq_02
+
+vsq_97:			equ			$					
 					xor			eax, eax
+					jmp			vsq_99
+
+vsq_98:			equ			$
+					mov			eax, 1
+
+vsq_99:			equ			$					
+					RESTORE		esi
 					leave
 					ret
 					%pop
@@ -78,7 +150,7 @@ val_squares:	equ         $
 ;	val_kings
 ;
 ;	Global variable g_kings contains a pointer to a string to be validated. A valid string should be valid as per
-;	val_squares, have a length of 4 and not contains square that are adjacent. If valid return 0. If no print an error message
+;	val_squares, have a length of 4 and not contains square that are adjacent. If valid return 0. If not print an error message
 ;	and return 1.
 ;
 					%push       val_kings
@@ -87,8 +159,53 @@ val_kings:		equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
 					enter       %$localsize, 0
-               
+					SAVE			esi
+					mov			esi, [g_kings]
+					test			esi, esi					;	Null pointer?
+					jz				vk_98
+					push			esi
+					call			strlen
+					add			esp, 4
+					cmp			eax, 4					;	Length of 4?
+					jne			vk_98
+					push			esi
+					call			val_squares
+					add			esp, 4
+					test			eax, eax					;	Squares valid?
+					jnz			vk_98
+;
+;	Check that squares are not adjacent
+;
+					mov			dl, [esi]
+					sub			dl, [esi + 2]
+					ABS			dl, al
+					mov			cl, [esi + 1]
+					sub			cl, [esi + 3]
+					ABS			cl, al
+					cmp			dl, 1
+					jne			vk_00
+					cmp			cl, 1
+					je				vk_98
+
+vk_00:			equ			$
+					add			dl, cl
+					cmp			dl, 1
+					je				vk_98
 					xor			eax, eax
+					jmp			vk_99
+
+vk_98:			equ			$
+					mov			esi, [g_kings]
+					push			esi
+					mov			esi, bad_kings
+					push			esi
+					push			dword [stderr]
+					call			fprintf
+					add			esp, 12
+					mov			eax, 1
+
+vk_99:			equ			$					
+					RESTORE		esi
 					leave
 					ret
 					%pop
@@ -105,8 +222,86 @@ val_gbr:			equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
 					enter       %$localsize, 0
-               
+					SAVE			esi
+					mov			esi, [g_gbr]
+;
+;	Check length					
+;
+					push			esi
+					call			strlen
+					add			esp, 4
+					cmp			eax, 7
+					jne			vg_98
+;
+;	Check first character
+;
+					lodsb
+					cmp			al, '0'
+					jb				vg_98
+					cmp			al, '4'
+					ja				vg_98
+;
+;	Check second character
+;
+					lodsb
+					cmp			al, '0'
+					jb				vg_98
+					cmp			al, '8'
+					ja				vg_98
+;
+;	Check third character
+;
+					lodsb
+					cmp			al, '0'
+					jb				vg_98
+					cmp			al, '8'
+					ja				vg_98
+;
+;	Check fourth character
+;
+					lodsb
+					cmp			al, '0'
+					jb				vg_98
+					cmp			al, '8'
+					ja				vg_98
+;
+;	Check fifth character					
+;
+					lodsb
+					cmp			al, '.'
+					jne			vg_98
+;
+;	Check sixth character
+;
+					lodsb
+					cmp			al, '0'
+					jb				vg_98
+					cmp			al, '8'
+					ja				vg_98
+
+;
+;	Check seventh character
+;
+					lodsb
+					cmp			al, '0'
+					jb				vg_98
+					cmp			al, '8'
+					ja				vg_98
 					xor			eax, eax
+					jmp			vg_99
+
+vg_98:			equ			$
+					mov			esi, [g_gbr]
+					push			esi
+					mov			esi, bad_gbr
+					push			esi
+					push			dword [stderr]
+					call			fprintf
+					add			esp, 12
+					mov			eax, 1
+
+vg_99:			equ			$					
+					RESTORE		esi
 					leave
 					ret
 					%pop
@@ -122,8 +317,29 @@ val_pos:			equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
 					enter       %$localsize, 0
+					SAVE			esi
+					mov			esi, [g_pos]
+					push			esi
+					call			val_squares
+					add			esp, 4
+					test			eax, eax
+					jnz			vpo_98
                
 					xor			eax, eax
+					jmp			vpo_99
+
+vpo_98:			equ			$
+					mov			esi, [g_pos]
+					push			esi
+					mov			esi, bad_pos
+					push			esi
+					push			dword [stderr]
+					call			fprintf
+					add			esp, 12
+					mov			eax, 1
+
+vpo_99:			equ			$					
+					RESTORE		esi
 					leave
 					ret
 					%pop
@@ -390,8 +606,201 @@ val_threats:	equ         $
 					%assign     %$localsize 0
 					%local		rc:dword
 					enter       %$localsize, 0
+					SAVE			esi
+;            if (strcmp(ptr, "SHORTEST") == 0) {
+;                rc = 0;
+;                opt_threats = SHORTEST;
+;            } else if (strcmp(ptr, "NONE") == 0) {
+;                rc = 0;
+;                opt_threats = NONE;
+;            } else if (strcmp(ptr, "ALL") == 0) {
+;                rc = 0;
+;                opt_threats = ALL;
+;            }
                
+					mov			esi, [g_st_threats]
+;
+;	Check for null pointer
+;
+					test			esi, esi
+					jz				vt_97
+;
+;	Check for empty string
+;
+					mov			al, [esi]
+					cmp			al, 0
+					jz				vt_97
+;
+;	Check for valid strings
+;
+					push			esi
+					push			TH_ALL
+					call			strcmp
+					add			esp, 8
+					test			eax, eax
+					jnz			vt_00
+					mov			eax, THR_ALL
+					mov			[g_threats], eax
+					jmp			vt_97
+
+vt_00:			equ			$					
+					push			esi
+					push			TH_NONE
+					call			strcmp
+					add			esp, 8
+					test			eax, eax
+					jnz			vt_01
+					mov			eax, THR_NONE
+					mov			[g_threats], eax 
+					jmp			vt_97
+
+vt_01:			equ			$
+					push			esi
+					push			TH_SHORTEST
+					call			strcmp
+					add			esp, 8
+					test			eax, eax
+					jnz			vt_98
+					mov			eax, THR_SHORTEST
+					mov			[g_threats], eax
+
+vt_97:			equ			$					
 					xor			eax, eax
+					jmp			vt_99
+
+vt_98:			equ			$
+					mov			esi, [g_st_threats]
+					push			esi
+					mov			esi, bad_threats
+					push			esi
+					push			dword [stderr]
+					call			fprintf
+					add			esp, 12
+					mov			eax, 1
+
+vt_99:			equ			$					
+					RESTORE		esi
+					leave
+					ret
+					%pop
+
+;
+;	val_kings_pos
+;
+;	Check that no square in g_kings is repeated in g_pos
+;
+					%push       val_kings_pos
+
+val_kings_pos:	equ         $
+					%stacksize  flat
+					%assign     %$localsize 0
+					enter       %$localsize, 0
+					SAVE			esi
+;
+;	Check white king square
+;
+					mov			edx, [g_kings]
+					mov			cx, [edx]
+					mov			esi, [g_pos]
+
+vkp_00:			equ			$
+					lodsw
+					cmp			al, 0
+					je				vkp_01
+					cmp			cx, ax
+					je				vkp_98
+					jmp			vkp_00
+;
+;	Check black king square
+;
+vkp_01:			equ			$					
+					mov			cx, [edx + 2]
+					mov			esi, [g_pos]
+
+vkp_02:			equ			$					
+					lodsw
+					cmp			al, 0
+					je				vkp_03
+					cmp			cx, ax
+					je				vkp_98
+					jmp			vkp_02
+
+vkp_03			equ			$
+					xor			eax, eax
+					jmp			vkp_99
+
+vkp_98:			equ			$
+					push			dword [stderr]
+					push			bad_vkp
+					call			fputs
+					add			esp, 8
+					mov			eax, 1
+vkp_99:			equ			$
+					RESTORE		esi
+					leave
+					ret
+					%pop
+
+					%push       val_gbr_pos
+;
+;	val_gbr_pos
+;
+;	Check that the number of non-royal pieces defined by g_gbr equals the number of squares in g_pos
+;
+val_gbr_pos:	equ         $
+					%stacksize  flat
+					%assign     %$localsize 0
+					enter       %$localsize, 0
+					SAVE			esi
+					mov			esi, [g_gbr]
+					mov			dl, 3
+;
+;	Process first four characters of gbr
+;
+vgp_00:			equ			$
+					lodsb
+					cmp			al, '.'
+					je				vgp_01
+					sub			al, '0'
+					cbw
+					div			dl
+					add			cl, al
+					add			cl, ah
+					jmp			vgp_00
+
+;
+;	Process sixth and seventh characters of gbr
+;
+vgp_01:			equ			$
+					lodsb
+					sub			al, '0'
+					add			cl, al
+					lodsb
+					sub			al, '0'
+					add			cl, al
+					movzx			ecx, cl
+					shl			ecx, 1
+;
+;	Check that twice the calculated length of g_pos equals actual length of g_pos
+;
+					push			ecx
+					push			dword [g_pos]
+					call			strlen
+					add			esp, 4
+					pop			ecx
+					cmp			eax, ecx
+					jne			vgp_98
+
+					xor			eax, eax
+					jmp			vgp_99
+vgp_98:			equ			$
+					push			dword [stderr]
+					push			bad_gp
+					call			fputs
+					add			esp, 8
+					mov			eax, 1
+vgp_99:			equ			$
+					RESTORE		esi
 					leave
 					ret
 					%pop

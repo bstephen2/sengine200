@@ -49,10 +49,10 @@ g_st_sols		dd				0
 g_st_refuts		dd				0
 g_st_threats	dd				0
 
+g_threats		dd				THR_SHORTEST
 g_moves			db				2
 g_sols			db				1
 g_refuts			db				0
-g_threats		db				THR_SHORTEST
 g_hash			db				FALSE
 g_help			db				FALSE
 g_set				db				FALSE

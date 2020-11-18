@@ -24,7 +24,7 @@ extern char* g_st_threats;
 extern char g_moves;
 extern char g_sols;
 extern char g_refuts;
-extern char g_threats;
+extern enum THREATS g_threats;
 extern bool	g_hash;
 extern bool	g_help;
 extern bool	g_set;
@@ -46,6 +46,8 @@ int val_moves(char*);
 int val_sols(char*);
 int val_refuts(char*);
 int val_threats(char*);
+int val_gbr_pos();
+int val_kings_pos();
 
 void do_usage(void)
 {
@@ -210,36 +212,59 @@ int process_args(int argc, char* argv[])
             }
 
             rc = 1;
-				return rc;
+            return rc;
         }
     }
 
     if (rc == 0) {
         if (g_kings == NULL) {
             fprintf(stderr, "%s--kings is mandatory\n", SENGINE_ERROR_PREFIX);
-				rc = 1;
+            rc = 1;
         }
 
         if (g_gbr == NULL) {
             fprintf(stderr, "%s--gbr is mandatory\n", SENGINE_ERROR_PREFIX);
-				rc = 1;
+            rc = 1;
         }
 
         if (g_pos == NULL) {
             fprintf(stderr, "%s--pos is mandatory\n", SENGINE_ERROR_PREFIX);
-				rc = 1;
+            rc = 1;
         }
     }
 
-	 if (g_kings != NULL) rc += val_kings();
+    if (g_kings != NULL) rc += val_kings();
+
     if (g_gbr != NULL) rc += val_gbr();
+
     if (g_pos != NULL) rc += val_pos();
+
     rc += val_castling(g_castling);
     rc += val_ep(g_ep);
     rc += val_moves(g_st_moves);
     rc += val_sols(g_st_sols);
     rc += val_refuts(g_st_refuts);
     rc += val_threats(g_st_threats);
+
+    if ((g_fleck == true) && (g_threats == NONE)) {
+        rc++;
+        fprintf(stderr, "%s--fleck and --threats==NONE invalid", SENGINE_ERROR_PREFIX);
+    }
+
+    if ((g_refuts > 0) && (g_tries == false)) {
+        rc++;
+        fprintf(stderr, "%s--refuts only valid with --tries", SENGINE_ERROR_PREFIX);
+    }
+
+    if ((g_tries == true) && (g_refuts == 0)) {
+        g_refuts = 1;
+    }
+
+    if (g_pos != NULL) {
+        if (g_gbr != NULL) rc += val_gbr_pos();
+
+        if (g_kings != NULL) rc += val_kings_pos();
+    }
 
     if (rc != 0) {
         fputs("\nTry sengine200 --help for guidance\n", stderr);

@@ -8,6 +8,7 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define SENGINE_PROG_NAME "Sengine"
 #define SENGINE_PROG_VERSION "2.00"
@@ -16,4 +17,15 @@
 #define SENGINE_ERROR_PREFIX "sengine200: "
 
 typedef unsigned char uchar;
+
+enum THREATS { ALL, NONE, SHORTEST };
+enum COLOUR { WHITE, BLACK };
+enum STATUS { SETPLAY, THREATS, TRIESKEYS };
+enum PIECE { NOPIECE = 0, OCCUPIED = 0, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
+           };
+enum SOUNDNESS { UNSET, SHORT_SOLUTION, SOUND, COOKED, NO_SOLUTION,
+                 MISSING_SOLUTION
+               };
+
+typedef uint64_t BITBOARD;
 
