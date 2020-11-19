@@ -22,8 +22,21 @@ extern char* g_st_moves;
 extern char* g_st_sols;
 extern char* g_st_refuts;
 extern char* g_st_threats;
+extern unsigned char g_moves;
+extern bool g_meson;
+extern bool g_classify;
+
+enum SOUNDNESS sound;
 
 int process_args(int, char**);
+void init();
+void init_mem();
+void close_mem();
+BOARD* setup_diagram(enum COLOUR);
+int validate_board(BOARD*);
+void solve_direct(DIR_SOL*, BOARD*);
+void freeBoardlist(BOARDLIST*);
+void freeBoard(BOARD*);
 
 static int rc = 0;
 static clock_t prog_start, prog_end;
@@ -58,6 +71,61 @@ static void toFinish()
     return;
 }
 
+void do_direct(BOARD* init_pos)
+{
+    DIR_SOL* dir_sol;
+    dir_sol = (DIR_SOL*) calloc(1, sizeof(DIR_SOL));
+    SENGINE_MEM_ASSERT(dir_sol);
+    solve_direct(dir_sol, init_pos);
+    //start_dir();
+
+    if (dir_sol->set != NULL) {
+        //add_dir_set(dir_sol->set);
+    }
+
+    if (dir_sol->tries != NULL) {
+        //add_dir_tries(dir_sol->tries);
+    }
+
+    if (dir_sol->keys != NULL) {
+        //add_dir_keys(dir_sol->keys);
+    }
+
+    if (g_meson == false) {
+        //add_dir_options();
+        //add_dir_stats(dir_sol);
+    }
+
+    prog_end = clock();
+    run_time = (double)(prog_end - prog_start) / CLOCKS_PER_SEC;
+
+    if (g_meson == false) {
+        //time_dir(run_time);
+    }
+
+    //end_dir();
+
+    if ((g_classify == true) && (g_moves == 2) && (sound == SOUND)) {
+        //class_direct_2(dir_sol, init_pos);
+    }
+
+    if (dir_sol->set != NULL) {
+        freeBoardlist(dir_sol->set);
+    }
+
+    if (dir_sol->tries != NULL) {
+        freeBoardlist(dir_sol->tries);
+    }
+
+    if (dir_sol->keys != NULL) {
+        freeBoardlist(dir_sol->keys);
+    }
+
+    free(dir_sol);
+    freeBoard(init_pos);
+    return;
+}
+
 int main(int argc, char* argv[])
 {
     int atrc;
@@ -67,6 +135,17 @@ int main(int argc, char* argv[])
     assert(atrc == 0);
 
     rc = process_args(argc, argv);
+
+    if (rc == 0) {
+        BOARD* init_pos;
+        init();
+        init_mem();
+        init_pos = setup_diagram(BLACK);
+        rc = validate_board(init_pos);
+
+        if (rc == 0) do_direct(init_pos);
+		  close_mem();
+    }
 
     return rc;
 }

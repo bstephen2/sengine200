@@ -1,0 +1,4 @@
+direct.o: In function `solve_direct':
+/home/bstephen/dev/dev2018/sengine200/direct.c:291: undefined reference to `g_trivialtries'
+collect2: error: ld returned 1 exit status
+make: *** [sengine200] Error 1
