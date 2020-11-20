@@ -6,6 +6,7 @@ sengine200	--kings=g3e5 \
 				--moves=2 \
 				--tries \
 				--actual \
+				--set \
 				--threats=SHORTEST
 RC=$?
 set -

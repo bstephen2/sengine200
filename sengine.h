@@ -13,6 +13,15 @@
 #include "utlist.h"
 #include "utstring.h"
 
+#ifdef __GNUC__
+#define COMP "gcc"
+#define CV  __VERSION__
+#else
+#define COMP "Unknown"
+#define CV "?.?"
+#endif
+
+#define SENGINE_PLATFORM "LINUX32"
 #define SENGINE_PROG_NAME "Sengine"
 #define SENGINE_PROG_VERSION "2.00"
 #define SENGINE_PROG_AUTHOR "Brian Stephenson"

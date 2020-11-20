@@ -18,6 +18,10 @@
 xmlChar* ConvertInput(const char* in, const char* encoding);
 
 extern bool g_meson;
+extern char* g_kings;
+extern char* g_gbr;
+extern char* g_pos;
+extern enum SOUNDNESS sound;
 
 static xmlTextWriterPtr writer;
 static xmlDocPtr doc;
@@ -39,26 +43,57 @@ void xml_start()
     utstring_printf(tmp, "%s (v. %s)", SENGINE_PROG_NAME, SENGINE_PROG_VERSION);
     rc = xmlTextWriterWriteElement(writer, BAD_CAST "Program", BAD_CAST utstring_body(tmp));
     assert(rc >= 0);
+    utstring_clear(tmp);
 
     if (g_meson == false) {
-			rc = xmlTextWriterWriteElement(writer, BAD_CAST "Author", BAD_CAST "Dummy");
-			rc = xmlTextWriterWriteElement(writer, BAD_CAST "compiler", BAD_CAST "Dummy");
-			rc = xmlTextWriterWriteElement(writer, BAD_CAST "platform", BAD_CAST "Dummy");
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Author", BAD_CAST SENGINE_PROG_AUTHOR);
+        utstring_printf(tmp, "%s (v %s)", COMP, CV);
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "compiler", BAD_CAST utstring_body(tmp));
+        assert(rc >= 0);
+        utstring_clear(tmp);
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "platform", BAD_CAST SENGINE_PLATFORM);
+        assert(rc >= 0);
+        utstring_printf(tmp, "%s:%s:%s", g_kings, g_gbr, g_pos);
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Diagram", BAD_CAST utstring_body(tmp));
+        assert(rc >= 0);
+        utstring_clear(tmp);
+    }
 
-//        (void) genxStartElementLiteral(w, NULL, author);
-//        (void) genxAddText(w, (unsigned char*) PROGRAM_AUTHOR);
-//        (void) genxEndElement(w);
-//        (void) genxStartElementLiteral(w, NULL, compel);
-//        (void) sprintf(progText, "%s (v %s)", COMP, CV);
-//        (void) genxAddText(w, (unsigned char*) progText);
-//        (void) genxEndElement(w);
-//        (void) genxStartElementLiteral(w, NULL, platform);
-//        (void) genxAddText(w, (unsigned char*) PLATFORM);
-//        (void) genxEndElement(w);
-//        (void) genxStartElementLiteral(w, NULL, diag);
-//        (void) sprintf(progText, "%s:%s:%s", opt_kings, opt_gbr, opt_pos);
-//        (void) genxAddText(w, (unsigned char*) progText);
-//        (void) genxEndElement(w);
+    switch (sound) {
+    case UNSET:
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Soundness", BAD_CAST "UNSET");
+        assert(rc >= 0);
+        break;
+
+    case SHORT_SOLUTION:
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Soundness", BAD_CAST "SHORT_SOLUTION");
+        assert(rc >= 0);
+        break;
+
+    case SOUND:
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Soundness", BAD_CAST "SOUND");
+        assert(rc >= 0);
+        break;
+
+    case COOKED:
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Soundness", BAD_CAST "COOKED");
+        assert(rc >= 0);
+        break;
+
+    case NO_SOLUTION:
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Soundness", BAD_CAST "NO_SOLUTION");
+        assert(rc >= 0);
+        break;
+
+    case MISSING_SOLUTION:
+        rc = xmlTextWriterWriteElement(writer, BAD_CAST "Soundness", BAD_CAST "MISSING_SOLUTION");
+        assert(rc >= 0);
+        break;
+
+    default:
+        (void) fputs("Sengine200: Invalid soundess indicator\n", stderr);
+        exit(1);
+        break;
     }
 
     utstring_free(tmp);
@@ -68,31 +103,60 @@ void xml_start()
 
 void xml_set(BOARDLIST* set_list)
 {
+	 int rc;
     xmlChar* tmp;
+    rc = xmlTextWriterStartElement(writer, BAD_CAST "Sets");
+    assert(rc >= 0);
+	 rc = xmlTextWriterEndElement(writer);
+    assert(rc >= 0);
     return;
 }
 
 void xml_tries(BOARDLIST* tries_list)
 {
+	 int rc;
     xmlChar* tmp;
+    rc = xmlTextWriterStartElement(writer, BAD_CAST "Tries");
+    assert(rc >= 0);
+	 rc = xmlTextWriterEndElement(writer);
+    assert(rc >= 0);
+
     return;
 }
 
 void xml_keys(BOARDLIST* keys_list)
 {
+	 int rc;
     xmlChar* tmp;
+    rc = xmlTextWriterStartElement(writer, BAD_CAST "Keys");
+    assert(rc >= 0);
+	 rc = xmlTextWriterEndElement(writer);
+    assert(rc >= 0);
+
     return;
 }
 
 void xml_options()
 {
+	 int rc;
     xmlChar* tmp;
+    rc = xmlTextWriterStartElement(writer, BAD_CAST "options");
+    assert(rc >= 0);
+	 rc = xmlTextWriterEndElement(writer);
+    assert(rc >= 0);
+
     return;
 }
 
 void xml_stats(DIR_SOL* dir_sol)
 {
+	 int rc;
     xmlChar* tmp;
+    rc = xmlTextWriterStartElement(writer, BAD_CAST "stats");
+    assert(rc >= 0);
+	 rc = xmlTextWriterEndElement(writer);
+    assert(rc >= 0);
+
     return;
 }
 

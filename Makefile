@@ -1,20 +1,18 @@
 # Sengine200
 # LINUX32 version
-PLATFORM	=	LINUX
-DBITS		=	D32
 BITS		=	32
 EXE		=	sengine200
 AS			=	nasm
 ADEBUG	=	-g -Fdwarf
 ARELEASE	=	#-O3
-AFLAGS	=	-f elf${BITS} ${DEBUG} ${RELEASE} -D${PLATFORM} -D${DBITS} -g
+AFLAGS	=	-f elf${BITS} ${DEBUG} ${RELEASE} -g
 CC			=	gcc
 LD			=	gcc
 RELEASE	=	-O3 -DNDEBUG
 DEBUG		=	-g -O0 
 INCLIB	=	-I/usr/include/libxml2
 HASHDEFS	=	-DHASH_FUNCTION=HASH_OAT
-CFLAGS	=	${DEBUG} ${HASHDEFS} ${INCLIB} -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11 -D${PLATFORM} -D${DBITS}
+CFLAGS	=	${DEBUG} ${HASHDEFS} ${INCLIB} -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
 LDFLAGS	=	-o${EXE} -fopenmp
 IND		=	astyle
 INDOPTS	=	--style=kr --align-pointer=type --indent=tab=3 --indent=spaces \
@@ -94,7 +92,7 @@ tags:	${CMODS} ${CHDS}
 	ctags ${CMODS} ${CHDS}
 
 clean:
-	rm ${COBJS} ${AOBJS} ${CASMS} ${POOLASMS} ${MD5ASMS} ${EXE} *orig *lst *a86 tags
+	rm ${COBJS} ${AOBJS} ${CASMS} ${POOLOBJS} ${MD5OBJS} ${POOLASMS} ${MD5ASMS} ${EXE} *orig *lst *a86 tags
 
 tidy:
 	${IND} ${INDOPTS} ${CMODS} ${CHDS}
