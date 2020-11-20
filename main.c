@@ -37,6 +37,14 @@ int validate_board(BOARD*);
 void solve_direct(DIR_SOL*, BOARD*);
 void freeBoardlist(BOARDLIST*);
 void freeBoard(BOARD*);
+void xml_start();
+void xml_set(BOARDLIST*);
+void xml_tries(BOARDLIST*);
+void xml_keys(BOARDLIST*);
+void xml_options();
+void xml_stats(DIR_SOL*);
+void xml_time(double);
+void xml_end();
 
 static int rc = 0;
 static clock_t prog_start, prog_end;
@@ -62,11 +70,11 @@ static void toFinish()
 
     if (g_st_threats != NULL) free(g_st_threats);
 
-//    if (rc != 0) {
-    prog_end = clock();
-    run_time = (double)(prog_end - prog_start) / CLOCKS_PER_SEC;
-    printf("Runtime = %3.6f\n", run_time);
-//   }
+    if (rc != 0) {
+        prog_end = clock();
+        run_time = (double)(prog_end - prog_start) / CLOCKS_PER_SEC;
+        printf("Runtime = %3.6f\n", run_time);
+    }
 
     return;
 }
@@ -77,33 +85,33 @@ void do_direct(BOARD* init_pos)
     dir_sol = (DIR_SOL*) calloc(1, sizeof(DIR_SOL));
     SENGINE_MEM_ASSERT(dir_sol);
     solve_direct(dir_sol, init_pos);
-    //start_dir();
+    xml_start();
 
     if (dir_sol->set != NULL) {
-        //add_dir_set(dir_sol->set);
+        xml_set(dir_sol->set);
     }
 
     if (dir_sol->tries != NULL) {
-        //add_dir_tries(dir_sol->tries);
+        xml_tries(dir_sol->tries);
     }
 
     if (dir_sol->keys != NULL) {
-        //add_dir_keys(dir_sol->keys);
+        xml_keys(dir_sol->keys);
     }
 
     if (g_meson == false) {
-        //add_dir_options();
-        //add_dir_stats(dir_sol);
+        xml_options();
+        xml_stats(dir_sol);
     }
 
     prog_end = clock();
     run_time = (double)(prog_end - prog_start) / CLOCKS_PER_SEC;
 
     if (g_meson == false) {
-        //time_dir(run_time);
+        xml_time(run_time);
     }
 
-    //end_dir();
+    xml_end();
 
     if ((g_classify == true) && (g_moves == 2) && (sound == SOUND)) {
         //class_direct_2(dir_sol, init_pos);
@@ -144,7 +152,8 @@ int main(int argc, char* argv[])
         rc = validate_board(init_pos);
 
         if (rc == 0) do_direct(init_pos);
-		  close_mem();
+
+        close_mem();
     }
 
     return rc;

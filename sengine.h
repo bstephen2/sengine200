@@ -9,9 +9,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "utstring.h"
 #include "uthash.h"
 #include "utlist.h"
+#include "utstring.h"
 
 #define SENGINE_PROG_NAME "Sengine"
 #define SENGINE_PROG_VERSION "2.00"

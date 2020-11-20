@@ -12,8 +12,9 @@ CC			=	gcc
 LD			=	gcc
 RELEASE	=	-O3 -DNDEBUG
 DEBUG		=	-g -O0 
+INCLIB	=	-I/usr/include/libxml2
 HASHDEFS	=	-DHASH_FUNCTION=HASH_OAT
-CFLAGS	=	${RELEASE} ${HASHDEFS} -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11 -D${PLATFORM} -D${DBITS}
+CFLAGS	=	${DEBUG} ${HASHDEFS} ${INCLIB} -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11 -D${PLATFORM} -D${DBITS}
 LDFLAGS	=	-o${EXE} -fopenmp
 IND		=	astyle
 INDOPTS	=	--style=kr --align-pointer=type --indent=tab=3 --indent=spaces \
@@ -34,9 +35,10 @@ CASMS		=	main.asm args.asm memory.asm xml.asm init.asm board.asm boardlist.asm d
 AHDS		=	sengine.inc
 AMODS		=	globals.asm vals.asm asminit.asm
 AOBJS		=	globals.o vals.o asminit.o
+LIBS		=	-l xml2
 
 sengine200:	${COBJS} ${AOBJS} ${POOLOBJS} ${MD5OBJS}
-	${LD}   ${LDFLAGS} ${COBJS} ${AOBJS} ${POOLOBJS} ${MD5OBJS}
+	${LD}   ${LDFLAGS} ${COBJS} ${AOBJS} ${POOLOBJS} ${MD5OBJS} ${LIBS}
 	cp ${EXE} ${HOME}/bin/${EXE}
 
 main.o:	main.c ${CHDS}

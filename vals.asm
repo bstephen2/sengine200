@@ -753,6 +753,7 @@ val_gbr_pos:	equ         $
 					enter       %$localsize, 0
 					SAVE			esi
 					mov			esi, [g_gbr]
+					xor			cl, cl
 					mov			dl, 3
 ;
 ;	Process first four characters of gbr
@@ -762,7 +763,7 @@ vgp_00:			equ			$
 					cmp			al, '.'
 					je				vgp_01
 					sub			al, '0'
-					cbw
+					movzx			ax, al	
 					div			dl
 					add			cl, al
 					add			cl, ah
