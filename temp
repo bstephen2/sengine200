@@ -1,1 +1,0 @@
-CFLAGS	=	${RELEASE} -DHASH_FUNCTION=HASH_OAT -c -mtune=native -m${BITS} -Wall -std=gnu11
