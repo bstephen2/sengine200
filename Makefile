@@ -12,7 +12,7 @@ RELEASE	=	-O3 -DNDEBUG
 DEBUG		=	-g -O0 
 INCLIB	=	-I/usr/include/libxml2
 HASHDEFS	=	-DHASH_FUNCTION=HASH_OAT
-CFLAGS	=	${DEBUG} ${HASHDEFS} ${INCLIB} -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
+CFLAGS	=	${RELEASE} ${HASHDEFS} ${INCLIB} -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
 LDFLAGS	=	-o${EXE} -fopenmp
 IND		=	astyle
 INDOPTS	=	--style=kr --align-pointer=type --indent=tab=3 --indent=spaces \
@@ -25,7 +25,7 @@ POOLASMS	=	pool.asm
 MD5HDS	=	md5.h
 MD5MODS	=	md5.c
 MD5OBJS	=	md5.o
-MDTASMS	=	md5.asm
+MD5ASMS	=	md5.asm
 CHDS		=	sengine.h
 CMODS		=	main.c args.c memory.c xml.c init.c board.c boardlist.c direct.c
 COBJS		=	main.o args.o memory.o xml.o init.o board.o boardlist.o direct.o

@@ -39,6 +39,9 @@ extern bool g_fleck;
 extern bool g_meson;
 extern bool g_classify;
 
+char* toStr(BOARD*);
+
+static void getWmoveXML(BOARDLIST*);
 static xmlTextWriterPtr writer;
 static xmlDocPtr doc;
 
@@ -119,15 +122,19 @@ void xml_start()
 
 void getBmoveXML(BOARDLIST* bList)
 {
+    int rc;
     BOARDLIST* wList;
     BOARD* brd;
     char* ptr;
     assert(bList != NULL);
+
     DL_FOREACH(bList->vektor, brd) {
         assert(brd != NULL);
-        (void) genxStartElementLiteral(w, NULL, bmel);
+        rc = xmlTextWriterStartElement(writer, BAD_CAST "bm");
+        assert(rc >= 0);
         ptr = toStr(brd);
-        (void) genxAddText(w, (unsigned char*) ptr);
+        rc = xmlTextWriterWriteRaw(writer, BAD_CAST ptr);
+        assert(rc >= 0);
         free(ptr);
         wList = brd->nextply;
 
@@ -135,7 +142,8 @@ void getBmoveXML(BOARDLIST* bList)
             getWmoveXML(wList);
         }
 
-        (void) genxEndElement(w);
+        rc = xmlTextWriterEndElement(writer);
+        assert(rc >= 0);
     }
 
     return;
@@ -143,33 +151,42 @@ void getBmoveXML(BOARDLIST* bList)
 
 void getWmoveXML(BOARDLIST* wbl)
 {
-//    BOARDLIST* thList;
-//    BOARDLIST* bList;
-//    BOARD* brd;
-//    char* ptr;
-//    assert(wbl != NULL);
-//    DL_FOREACH(wbl->vektor, brd) {
-//        assert(brd != NULL);
-//        (void) genxStartElementLiteral(w, NULL, wmel);
-//        ptr = toStr(brd);
-//        (void) genxAddText(w, (unsigned char*) ptr);
-//        free(ptr);
-//        thList = brd->threat;
-//
-//        if (thList != NULL) {
-//            (void) genxStartElementLiteral(w, NULL, threl);
-//            getWmoveXML(thList);
-//            (void) genxEndElement(w);
-//        }
-//
-//        bList = brd->nextply;
-//
-//        if (bList != NULL) {
-//            getBmoveXML(bList);
-//        }
-//
-//        (void) genxEndElement(w);
-//    }
+    int rc;
+    BOARDLIST* thList;
+    BOARDLIST* bList;
+    BOARD* brd;
+    char* ptr;
+    assert(wbl != NULL);
+
+    DL_FOREACH(wbl->vektor, brd) {
+        assert(brd != NULL);
+        rc = xmlTextWriterStartElement(writer, BAD_CAST "wm");
+        assert(rc >= 0);
+
+        ptr = toStr(brd);
+		  rc = xmlTextWriterWriteRaw(writer, BAD_CAST ptr);
+		  assert(rc >= 0);
+        free(ptr);
+        thList = brd->threat;
+
+        if (thList != NULL) {
+            rc = xmlTextWriterStartElement(writer, BAD_CAST "thr");
+            assert(rc >= 0);
+
+            getWmoveXML(thList);
+            rc = xmlTextWriterEndElement(writer);
+            assert(rc >= 0);
+        }
+
+        bList = brd->nextply;
+
+        if (bList != NULL) {
+            getBmoveXML(bList);
+        }
+
+        rc = xmlTextWriterEndElement(writer);
+        assert(rc >= 0);
+    }
 
     return;
 }
@@ -177,9 +194,9 @@ void getWmoveXML(BOARDLIST* wbl)
 void xml_set(BOARDLIST* set_list)
 {
     int rc;
-    xmlChar* tmp;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Sets");
     assert(rc >= 0);
+	 getBmoveXML(set_list);
     rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
     return;
@@ -188,9 +205,9 @@ void xml_set(BOARDLIST* set_list)
 void xml_tries(BOARDLIST* tries_list)
 {
     int rc;
-    xmlChar* tmp;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Tries");
     assert(rc >= 0);
+	 getWmoveXML(tries_list);
     rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
@@ -200,9 +217,9 @@ void xml_tries(BOARDLIST* tries_list)
 void xml_keys(BOARDLIST* keys_list)
 {
     int rc;
-    xmlChar* tmp;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Keys");
     assert(rc >= 0);
+	 getWmoveXML(keys_list);
     rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 

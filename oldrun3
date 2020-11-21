@@ -6,7 +6,7 @@ sengine143	--kings=h6e8 \
 				--moves=3 \
 				--castling=qk \
 				--fleck \
-				--threats=ALL \
+				--threats=SHORTEST \
 				--actual
 RC=$?
 set -
