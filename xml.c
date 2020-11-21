@@ -21,7 +21,23 @@ extern bool g_meson;
 extern char* g_kings;
 extern char* g_gbr;
 extern char* g_pos;
+extern char* g_castling;
+extern char* g_ep;
 extern enum SOUNDNESS sound;
+extern enum THREATS g_threats;
+extern unsigned char g_moves;
+extern unsigned char g_sols;
+extern unsigned char g_refuts;
+extern bool g_hash;
+extern bool g_help;
+extern bool g_set;
+extern bool g_tries;
+extern bool g_trivtries;
+extern bool g_actual	;
+extern bool g_shortvars;
+extern bool g_fleck;
+extern bool g_meson;
+extern bool g_classify;
 
 static xmlTextWriterPtr writer;
 static xmlDocPtr doc;
@@ -101,24 +117,81 @@ void xml_start()
     return;
 }
 
+void getBmoveXML(BOARDLIST* bList)
+{
+    BOARDLIST* wList;
+    BOARD* brd;
+    char* ptr;
+    assert(bList != NULL);
+    DL_FOREACH(bList->vektor, brd) {
+        assert(brd != NULL);
+        (void) genxStartElementLiteral(w, NULL, bmel);
+        ptr = toStr(brd);
+        (void) genxAddText(w, (unsigned char*) ptr);
+        free(ptr);
+        wList = brd->nextply;
+
+        if (wList != NULL) {
+            getWmoveXML(wList);
+        }
+
+        (void) genxEndElement(w);
+    }
+
+    return;
+}
+
+void getWmoveXML(BOARDLIST* wbl)
+{
+//    BOARDLIST* thList;
+//    BOARDLIST* bList;
+//    BOARD* brd;
+//    char* ptr;
+//    assert(wbl != NULL);
+//    DL_FOREACH(wbl->vektor, brd) {
+//        assert(brd != NULL);
+//        (void) genxStartElementLiteral(w, NULL, wmel);
+//        ptr = toStr(brd);
+//        (void) genxAddText(w, (unsigned char*) ptr);
+//        free(ptr);
+//        thList = brd->threat;
+//
+//        if (thList != NULL) {
+//            (void) genxStartElementLiteral(w, NULL, threl);
+//            getWmoveXML(thList);
+//            (void) genxEndElement(w);
+//        }
+//
+//        bList = brd->nextply;
+//
+//        if (bList != NULL) {
+//            getBmoveXML(bList);
+//        }
+//
+//        (void) genxEndElement(w);
+//    }
+
+    return;
+}
+
 void xml_set(BOARDLIST* set_list)
 {
-	 int rc;
+    int rc;
     xmlChar* tmp;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Sets");
     assert(rc >= 0);
-	 rc = xmlTextWriterEndElement(writer);
+    rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
     return;
 }
 
 void xml_tries(BOARDLIST* tries_list)
 {
-	 int rc;
+    int rc;
     xmlChar* tmp;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Tries");
     assert(rc >= 0);
-	 rc = xmlTextWriterEndElement(writer);
+    rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
     return;
@@ -126,11 +199,11 @@ void xml_tries(BOARDLIST* tries_list)
 
 void xml_keys(BOARDLIST* keys_list)
 {
-	 int rc;
+    int rc;
     xmlChar* tmp;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Keys");
     assert(rc >= 0);
-	 rc = xmlTextWriterEndElement(writer);
+    rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
     return;
@@ -138,11 +211,93 @@ void xml_keys(BOARDLIST* keys_list)
 
 void xml_options()
 {
-	 int rc;
-    xmlChar* tmp;
+    int rc;
+    char* ptr;
+    char on[] = "true";
+    char off[] = "false";
+    char all[] = "ALL";
+    char none[] = "NONE";
+    char shortest[] = "SHORTEST";
+    char unknown[] = "UNKNOWN";
+
     rc = xmlTextWriterStartElement(writer, BAD_CAST "options");
     assert(rc >= 0);
-	 rc = xmlTextWriterEndElement(writer);
+
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "moves", "%u", g_moves);
+    assert(rc >= 0);
+
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "sols", "%u", g_sols);
+    assert(rc >= 0);
+
+    if (g_castling != NULL) {
+        rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "castling", "%s", g_castling);
+        assert(rc >= 0);
+    } else {
+        rc = xmlTextWriterStartElement(writer, BAD_CAST "castling");
+        assert(rc >= 0);
+        rc = xmlTextWriterEndElement(writer);
+        assert(rc >= 0);
+    }
+
+    if (g_ep != NULL) {
+        rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "ep", "%s", g_ep);
+        assert(rc >= 0);
+    } else {
+        rc = xmlTextWriterStartElement(writer, BAD_CAST "ep");
+        assert(rc >= 0);
+        rc = xmlTextWriterEndElement(writer);
+        assert(rc >= 0);
+    }
+
+    ptr = (g_set == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "set", "%s", ptr);
+    assert(rc >= 0);
+
+    ptr = (g_tries == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "tries", "%s", ptr);
+    assert(rc >= 0);
+
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "refuts", "%d", g_refuts);
+    assert(rc >= 0);
+
+    ptr = (g_trivtries == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "trivialtries", "%s", ptr);
+    assert(rc >= 0);
+
+    ptr = (g_actual == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "actual", "%s", ptr);
+    assert(rc >= 0);
+
+    switch (g_threats) {
+    case ALL:
+        ptr = all;
+        break;
+
+    case NONE:
+        ptr = none;
+        break;
+
+    case SHORTEST:
+        ptr = shortest;
+        break;
+
+    default:
+        ptr = unknown;
+        break;
+    }
+
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "threats", "%s", ptr);
+    assert(rc >= 0);
+
+    ptr = (g_fleck == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "fleck", "%s", ptr);
+    assert(rc >= 0);
+
+    ptr = (g_shortvars == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "shortvars", "%s", ptr);
+    assert(rc >= 0);
+
+    rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
     return;
@@ -150,11 +305,17 @@ void xml_options()
 
 void xml_stats(DIR_SOL* dir_sol)
 {
-	 int rc;
-    xmlChar* tmp;
+    int rc;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "stats");
     assert(rc >= 0);
-	 rc = xmlTextWriterEndElement(writer);
+
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "hash_added", "%u", dir_sol->hash_added);
+    assert(rc >= 0);
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "hash_hit_null", "%u", dir_sol->hash_hit_null);
+    assert(rc >= 0);
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "hash_hit_list", "%u", dir_sol->hash_hit_list);
+    assert(rc >= 0);
+    rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
     return;
@@ -165,9 +326,6 @@ void xml_time(double runtime)
     int rc;
 
     rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "SolvingTime", "%f", runtime);
-    assert(rc >= 0);
-
-    rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
     return;

@@ -4,8 +4,8 @@ sengine200	--kings=g3e5 \
 				--gbr=0858.34 \
 				--pos=f4e1h6e3c7a2e8b8h4g8d7d6c3f3b7g6h5e4 \
 				--moves=2 \
-				--tries \
 				--actual \
+				--tries \
 				--set \
 				--threats=SHORTEST
 RC=$?
