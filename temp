@@ -1,1 +1,11 @@
-char* toStr(BOARD* bd)
+# pragma omp parallel shared ( prime_num, primes, sine_num, sines )
+{
+  # pragma omp sections
+  {
+    # pragma omp section
+    {
+      wtime1 = omp_get_wtime ( );
+      primes = prime_table ( prime_num );
+      wtime1 = omp_get_wtime ( ) - wtime1;
+    }
+    # pragma omp section

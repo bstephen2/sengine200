@@ -15,14 +15,14 @@ extern char* g_ep;
 extern char* g_kings;
 extern char* g_gbr;
 extern char* g_pos;
-extern BITBOARD setMask[64];
-extern BITBOARD clearMask[64];
-extern BITBOARD king_attacks[64];
-extern BITBOARD knight_attacks[64];
-extern BITBOARD bishop_attacks[64];
-extern BITBOARD rook_attacks[64];
-extern BITBOARD pawn_attacks[2][64];
-extern BITBOARD pawn_moves[2][64];
+extern BITBOARD g_setMask[64];
+extern BITBOARD g_clearMask[64];
+extern BITBOARD g_king_attacks[64];
+extern BITBOARD g_knight_attacks[64];
+extern BITBOARD g_bishop_attacks[64];
+extern BITBOARD g_rook_attacks[64];
+extern BITBOARD g_pawn_attacks[2][64];
+extern BITBOARD g_pawn_moves[2][64];
 extern BBOARD rook_commonAttacks[64][64];
 extern BBOARD bishop_commonAttacks[64][64];
 
@@ -211,12 +211,12 @@ BOARD* setup_diagram(enum COLOUR played)
     // Kings
     i = SQUARE_TO_INT(g_kings);
     pos.kingsq[WHITE] = (char) i;
-    pos.bitBoard[WHITE][KING] |= setMask[i];
-    pos.bitBoard[WHITE][OCCUPIED] |= setMask[i];
+    pos.bitBoard[WHITE][KING] |= g_setMask[i];
+    pos.bitBoard[WHITE][OCCUPIED] |= g_setMask[i];
     i = SQUARE_TO_INT(g_kings + 2);
     pos.kingsq[BLACK] = (char) i;
-    pos.bitBoard[BLACK][KING] |= setMask[i];
-    pos.bitBoard[BLACK][OCCUPIED] |= setMask[i];
+    pos.bitBoard[BLACK][KING] |= g_setMask[i];
+    pos.bitBoard[BLACK][OCCUPIED] |= g_setMask[i];
     // Rest of position
     po = g_pos;
     // Queens
@@ -226,8 +226,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[WHITE][QUEEN] |= setMask[i];
-        pos.bitBoard[WHITE][OCCUPIED] |= setMask[i];
+        pos.bitBoard[WHITE][QUEEN] |= g_setMask[i];
+        pos.bitBoard[WHITE][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -236,8 +236,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[BLACK][QUEEN] |= setMask[i];
-        pos.bitBoard[BLACK][OCCUPIED] |= setMask[i];
+        pos.bitBoard[BLACK][QUEEN] |= g_setMask[i];
+        pos.bitBoard[BLACK][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -249,8 +249,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[WHITE][ROOK] |= setMask[i];
-        pos.bitBoard[WHITE][OCCUPIED] |= setMask[i];
+        pos.bitBoard[WHITE][ROOK] |= g_setMask[i];
+        pos.bitBoard[WHITE][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -259,8 +259,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[BLACK][ROOK] |= setMask[i];
-        pos.bitBoard[BLACK][OCCUPIED] |= setMask[i];
+        pos.bitBoard[BLACK][ROOK] |= g_setMask[i];
+        pos.bitBoard[BLACK][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -272,8 +272,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[WHITE][BISHOP] |= setMask[i];
-        pos.bitBoard[WHITE][OCCUPIED] |= setMask[i];
+        pos.bitBoard[WHITE][BISHOP] |= g_setMask[i];
+        pos.bitBoard[WHITE][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -282,8 +282,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[BLACK][BISHOP] |= setMask[i];
-        pos.bitBoard[BLACK][OCCUPIED] |= setMask[i];
+        pos.bitBoard[BLACK][BISHOP] |= g_setMask[i];
+        pos.bitBoard[BLACK][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -295,8 +295,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[WHITE][KNIGHT] |= setMask[i];
-        pos.bitBoard[WHITE][OCCUPIED] |= setMask[i];
+        pos.bitBoard[WHITE][KNIGHT] |= g_setMask[i];
+        pos.bitBoard[WHITE][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -305,8 +305,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p != 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[BLACK][KNIGHT] |= setMask[i];
-        pos.bitBoard[BLACK][OCCUPIED] |= setMask[i];
+        pos.bitBoard[BLACK][KNIGHT] |= g_setMask[i];
+        pos.bitBoard[BLACK][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -316,8 +316,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p > 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[WHITE][PAWN] |= setMask[i];
-        pos.bitBoard[WHITE][OCCUPIED] |= setMask[i];
+        pos.bitBoard[WHITE][PAWN] |= g_setMask[i];
+        pos.bitBoard[WHITE][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -327,8 +327,8 @@ BOARD* setup_diagram(enum COLOUR played)
 
     while (p > 0) {
         i = SQUARE_TO_INT(po);
-        pos.bitBoard[BLACK][PAWN] |= setMask[i];
-        pos.bitBoard[BLACK][OCCUPIED] |= setMask[i];
+        pos.bitBoard[BLACK][PAWN] |= g_setMask[i];
+        pos.bitBoard[BLACK][OCCUPIED] |= g_setMask[i];
         p--;
         po += 2;
     }
@@ -346,10 +346,10 @@ BOARD* setup_diagram(enum COLOUR played)
     (void) fprintf(stderr, "1 => %d\n", tzcount(1));
     (void) fprintf(stderr, "2 => %d\n", tzcount(2));
     (void) fprintf(stderr, "4 => %d\n", tzcount(4));
-    (void) fprintf(stderr, "1<< 31 => %d\n", tzcount(setMask[31]));
-    (void) fprintf(stderr, "1<< 32 => %d\n", tzcount(setMask[32]));
-    (void) fprintf(stderr, "1<< 33 => %d\n", tzcount(setMask[33]));
-    (void) fprintf(stderr, "1<< 63 => %d\n", tzcount(setMask[63]));
+    (void) fprintf(stderr, "1<< 31 => %d\n", tzcount(g_setMask[31]));
+    (void) fprintf(stderr, "1<< 32 => %d\n", tzcount(g_setMask[32]));
+    (void) fprintf(stderr, "1<< 33 => %d\n", tzcount(g_setMask[33]));
+    (void) fprintf(stderr, "1<< 63 => %d\n", tzcount(g_setMask[63]));
 #endif
     return rb;
 }
@@ -364,20 +364,20 @@ bool attacks(POSITION* pos, unsigned char square, enum COLOUR colour)
 
     // (1) Attack by King?
 
-    if ((king_attacks[square] & pos->bitBoard[colour][KING]) != 0) {
+    if ((g_king_attacks[square] & pos->bitBoard[colour][KING]) != 0) {
         return true;
     }
 
     // (2) Atack by a Pawn?
 
-    if ((pawn_attacks[colour ^ 1][square] & pos->bitBoard[colour][PAWN]) !=
+    if ((g_pawn_attacks[colour ^ 1][square] & pos->bitBoard[colour][PAWN]) !=
             0) {
         return true;
     }
 
     // (3) Attack by a Knight?
 
-    if ((knight_attacks[square] & pos->bitBoard[colour][KNIGHT]) != 0) {
+    if ((g_knight_attacks[square] & pos->bitBoard[colour][KNIGHT]) != 0) {
         return true;
     }
 
@@ -385,7 +385,7 @@ bool attacks(POSITION* pos, unsigned char square, enum COLOUR colour)
     qb = pos->bitBoard[colour][BISHOP] | pos->bitBoard[colour][QUEEN];
     occupied = pos->bitBoard[WHITE][OCCUPIED] | pos->bitBoard[BLACK][OCCUPIED];
 
-    if ((bishop_attacks[square] & qb) != 0) {
+    if ((g_bishop_attacks[square] & qb) != 0) {
         i = tzcount(qb);
 
         while (i < 64) {
@@ -397,7 +397,7 @@ bool attacks(POSITION* pos, unsigned char square, enum COLOUR colour)
                 }
             }
 
-            qb &= clearMask[i];
+            qb &= g_clearMask[i];
             i = tzcount(qb);
         }
     }
@@ -405,7 +405,7 @@ bool attacks(POSITION* pos, unsigned char square, enum COLOUR colour)
     // (5) Attack by rook/queen?
     qr = pos->bitBoard[colour][ROOK] | pos->bitBoard[colour][QUEEN];
 
-    if ((rook_attacks[square] & qr) != 0) {
+    if ((g_rook_attacks[square] & qr) != 0) {
         i = tzcount(qr);
 
         while (i < 64) {
@@ -417,7 +417,7 @@ bool attacks(POSITION* pos, unsigned char square, enum COLOUR colour)
                 }
             }
 
-            qr &= clearMask[i];
+            qr &= g_clearMask[i];
             i = tzcount(qr);
         }
     }
@@ -477,7 +477,7 @@ char* getSquares(BITBOARD inLong)
         c++;
         sprintf(n, "%d", i);
         (void) strcat(rs, n);
-        iTos &= clearMask[i];
+        iTos &= g_clearMask[i];
         i = tzcount(iTos);
     }
 
@@ -488,9 +488,9 @@ char* getSquares(BITBOARD inLong)
 static void nMakeMove(POSITION* ppos, enum COLOUR colour, enum PIECE pic,
                       int inFrom, int inTo)
 {
-    BITBOARD clearFrom = clearMask[inFrom];
-    BITBOARD setTo = setMask[inTo];
-    BITBOARD clearTo = clearMask[inTo];
+    BITBOARD clearFrom = g_clearMask[inFrom];
+    BITBOARD setTo = g_setMask[inTo];
+    BITBOARD clearTo = g_clearMask[inTo];
     ppos->bitBoard[colour][pic] &= clearFrom;
     ppos->bitBoard[colour][pic] |= setTo;
     ppos->bitBoard[colour][OCCUPIED] &= clearFrom;
@@ -515,7 +515,7 @@ static void recordMove(BOARD* bd, enum COLOUR colour, enum PIECE pic,
     bd->to = (unsigned char) inTo;
     bd->promotion = inProm;
 
-    if ((fbd->pos->bitBoard[colour ^ 1][OCCUPIED] & setMask[inTo]) != 0) {
+    if ((fbd->pos->bitBoard[colour ^ 1][OCCUPIED] & g_setMask[inTo]) != 0) {
         bd->captured = true;
     } else {
         bd->captured = false;
@@ -544,12 +544,12 @@ void generateKingMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
     assert(bl != NULL);
     assert(bd->pos != NULL);
     iFrom = bd->pos->kingsq[colour];
-    iTos = king_attacks[iFrom];
+    iTos = g_king_attacks[iFrom];
     i = tzcount(iTos);
     occupied = bd->pos->bitBoard[colour][OCCUPIED];
 
     while (i < 64) {
-        if ((occupied & setMask[i]) == 0) {
+        if ((occupied & g_setMask[i]) == 0) {
             npos = * (bd->pos);
             nMakeMove(&npos, colour, KING, iFrom, i);
             npos.kingsq[colour] = (unsigned char) i;
@@ -570,7 +570,7 @@ void generateKingMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
             }
         }
 
-        iTos &= clearMask[i];
+        iTos &= g_clearMask[i];
         i = tzcount(iTos);
     }
 
@@ -591,12 +591,12 @@ void generateKnightMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
 
     while (i < 64) {
         // Found a knight at i.
-        jtemp = knight_attacks[i];
+        jtemp = g_knight_attacks[i];
         j = tzcount(jtemp);
 
         while (j < 64) {
             // Found an attacked square at j.
-            if ((occupied & setMask[j]) == 0) {
+            if ((occupied & g_setMask[j]) == 0) {
                 // Not occupied by a friendly piece.
                 npos = * (bd->pos);
                 nMakeMove(&npos, colour, KNIGHT, i, j);
@@ -615,11 +615,11 @@ void generateKnightMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
                 }
             }
 
-            jtemp &= clearMask[j];
+            jtemp &= g_clearMask[j];
             j = tzcount(jtemp);
         }
 
-        temp &= clearMask[i];
+        temp &= g_clearMask[i];
         i = tzcount(temp);
     }
 
@@ -644,11 +644,11 @@ void generateBishopLikeMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl,
     i = tzcount(ptemp);
 
     while (i < 64) {
-        jtemp = bishop_attacks[i];
+        jtemp = g_bishop_attacks[i];
         j = tzcount(jtemp);
 
         while (j < 64) {
-            if ((coccupied & setMask[j]) == 0) {
+            if ((coccupied & g_setMask[j]) == 0) {
                 bboard = bishop_commonAttacks[i][j];
                 assert(bboard.used == true);
 
@@ -666,11 +666,11 @@ void generateBishopLikeMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl,
                 }
             }
 
-            jtemp &= clearMask[j];
+            jtemp &= g_clearMask[j];
             j = tzcount(jtemp);
         }
 
-        ptemp &= clearMask[i];
+        ptemp &= g_clearMask[i];
         i = tzcount(ptemp);
     }
 
@@ -693,11 +693,11 @@ void generateRookLikeMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl,
     i = tzcount(ptemp);
 
     while (i < 64) {
-        jtemp = rook_attacks[i];
+        jtemp = g_rook_attacks[i];
         j = tzcount(jtemp);
 
         while (j < 64) {
-            if ((coccupied & setMask[j]) == 0) {
+            if ((coccupied & g_setMask[j]) == 0) {
                 temp = rook_commonAttacks[i][j];
                 assert(temp.used == true);
 
@@ -732,11 +732,11 @@ void generateRookLikeMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl,
                 }
             }
 
-            jtemp &= clearMask[j];
+            jtemp &= g_clearMask[j];
             j = tzcount(jtemp);
         }
 
-        ptemp &= clearMask[i];
+        ptemp &= g_clearMask[i];
         i = tzcount(ptemp);
     }
 
@@ -754,9 +754,9 @@ void generateWhiteCastlings(BOARD* bd, BOARDLIST* bl)
 
     if ((bd->check == false) && (bd->pos->kingsq[WHITE] == 4)) {
         if ((bd->pos->flags & W_KING_CASTLING) == W_KING_CASTLING) {
-            if ((bd->pos->bitBoard[WHITE][ROOK] & setMask[7]) != 0) {
-                if ((occupied & setMask[5]) == 0) {
-                    if ((occupied & setMask[6]) == 0) {
+            if ((bd->pos->bitBoard[WHITE][ROOK] & g_setMask[7]) != 0) {
+                if ((occupied & g_setMask[5]) == 0) {
+                    if ((occupied & g_setMask[6]) == 0) {
                         if (attacks(bd->pos, 5, BLACK) == false) {
                             if (attacks(bd->pos, 6, BLACK) == false) {
                                 nb = getBoard(bd->pos, WHITE, bl->moveNumber);
@@ -775,10 +775,10 @@ void generateWhiteCastlings(BOARD* bd, BOARDLIST* bl)
         }
 
         if ((bd->pos->flags & W_QUEEN_CASTLING) == W_QUEEN_CASTLING) {
-            if ((bd->pos->bitBoard[WHITE][ROOK] & setMask[0]) != 0) {
-                if ((occupied & setMask[3]) == 0) {
-                    if ((occupied & setMask[2]) == 0) {
-                        if ((occupied & setMask[1]) == 0) {
+            if ((bd->pos->bitBoard[WHITE][ROOK] & g_setMask[0]) != 0) {
+                if ((occupied & g_setMask[3]) == 0) {
+                    if ((occupied & g_setMask[2]) == 0) {
+                        if ((occupied & g_setMask[1]) == 0) {
                             if (attacks(bd->pos, 2, BLACK) == false) {
                                 if (attacks(bd->pos, 3, BLACK) == false) {
                                     nb = getBoard(bd->pos, WHITE, bl->moveNumber);
@@ -812,9 +812,9 @@ void generateBlackCastlings(BOARD* bd, BOARDLIST* bl)
 
     if ((bd->check == false) && (bd->pos->kingsq[BLACK] == 60)) {
         if ((bd->pos->flags & B_KING_CASTLING) == B_KING_CASTLING) {
-            if ((bd->pos->bitBoard[BLACK][ROOK] & setMask[63]) != 0) {
-                if ((occupied & setMask[61]) == 0) {
-                    if ((occupied & setMask[62]) == 0) {
+            if ((bd->pos->bitBoard[BLACK][ROOK] & g_setMask[63]) != 0) {
+                if ((occupied & g_setMask[61]) == 0) {
+                    if ((occupied & g_setMask[62]) == 0) {
                         if (attacks(bd->pos, 61, WHITE) == false) {
                             if (attacks(bd->pos, 62, WHITE) == false) {
                                 nb = getBoard(bd->pos, BLACK, bl->moveNumber);
@@ -833,10 +833,10 @@ void generateBlackCastlings(BOARD* bd, BOARDLIST* bl)
         }
 
         if ((bd->pos->flags & B_QUEEN_CASTLING) == B_QUEEN_CASTLING) {
-            if ((bd->pos->bitBoard[BLACK][ROOK] & setMask[56]) != 0) {
-                if ((occupied & setMask[59]) == 0) {
-                    if ((occupied & setMask[58]) == 0) {
-                        if ((occupied & setMask[57]) == 0) {
+            if ((bd->pos->bitBoard[BLACK][ROOK] & g_setMask[56]) != 0) {
+                if ((occupied & g_setMask[59]) == 0) {
+                    if ((occupied & g_setMask[58]) == 0) {
+                        if ((occupied & g_setMask[57]) == 0) {
                             if (attacks(bd->pos, 59, WHITE) == false) {
                                 if (attacks(bd->pos, 58, WHITE) == false) {
                                     nb = getBoard(bd->pos, BLACK, bl->moveNumber);
@@ -869,7 +869,7 @@ void generateEP(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
     if (iFile != 0) {
         from = bd->epSquare - 1;
 
-        if ((bd->pos->bitBoard[colour][PAWN] & setMask[from]) != 0) {
+        if ((bd->pos->bitBoard[colour][PAWN] & g_setMask[from]) != 0) {
             if (colour == WHITE) {
                 to = bd->epSquare + 8;
             } else {
@@ -877,12 +877,12 @@ void generateEP(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
             }
 
             nb = getBoard(bd->pos, (unsigned char) colour, bl->moveNumber);
-            nb->pos->bitBoard[colour][PAWN] &= clearMask[from];
-            nb->pos->bitBoard[colour][OCCUPIED] &= clearMask[from];
-            nb->pos->bitBoard[colour][PAWN] |= setMask[to];
-            nb->pos->bitBoard[colour][OCCUPIED] |= setMask[to];
-            nb->pos->bitBoard[colour ^ 1][OCCUPIED] &= clearMask[bd->epSquare];
-            nb->pos->bitBoard[colour ^ 1][PAWN] &= clearMask[bd->epSquare];
+            nb->pos->bitBoard[colour][PAWN] &= g_clearMask[from];
+            nb->pos->bitBoard[colour][OCCUPIED] &= g_clearMask[from];
+            nb->pos->bitBoard[colour][PAWN] |= g_setMask[to];
+            nb->pos->bitBoard[colour][OCCUPIED] |= g_setMask[to];
+            nb->pos->bitBoard[colour ^ 1][OCCUPIED] &= g_clearMask[bd->epSquare];
+            nb->pos->bitBoard[colour ^ 1][PAWN] &= g_clearMask[bd->epSquare];
 
             if (attacks(nb->pos, nb->pos->kingsq[colour], (colour ^ 1)) ==
                     false) {
@@ -898,7 +898,7 @@ void generateEP(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
     if (iFile != 7) {
         from = bd->epSquare + 1;
 
-        if ((bd->pos->bitBoard[colour][PAWN] & setMask[from]) != 0) {
+        if ((bd->pos->bitBoard[colour][PAWN] & g_setMask[from]) != 0) {
             if (colour == WHITE) {
                 to = bd->epSquare + 8;
             } else {
@@ -906,12 +906,12 @@ void generateEP(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
             }
 
             nb = getBoard(bd->pos, (unsigned char) colour, bl->moveNumber);
-            nb->pos->bitBoard[colour][PAWN] &= clearMask[from];
-            nb->pos->bitBoard[colour][OCCUPIED] &= clearMask[from];
-            nb->pos->bitBoard[colour][PAWN] |= setMask[to];
-            nb->pos->bitBoard[colour][OCCUPIED] |= setMask[to];
-            nb->pos->bitBoard[colour ^ 1][OCCUPIED] &= clearMask[bd->epSquare];
-            nb->pos->bitBoard[colour ^ 1][PAWN] &= clearMask[bd->epSquare];
+            nb->pos->bitBoard[colour][PAWN] &= g_clearMask[from];
+            nb->pos->bitBoard[colour][OCCUPIED] &= g_clearMask[from];
+            nb->pos->bitBoard[colour][PAWN] |= g_setMask[to];
+            nb->pos->bitBoard[colour][OCCUPIED] |= g_setMask[to];
+            nb->pos->bitBoard[colour ^ 1][OCCUPIED] &= g_clearMask[bd->epSquare];
+            nb->pos->bitBoard[colour ^ 1][PAWN] &= g_clearMask[bd->epSquare];
 
             if (attacks(nb->pos, nb->pos->kingsq[colour], (colour ^ 1)) ==
                     false) {
@@ -929,16 +929,16 @@ void generateEP(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
 
 void makePromotion(BOARD* bd, enum COLOUR colour, int prom, int from, int to)
 {
-    bd->pos->bitBoard[colour][PAWN] &= clearMask[from];
-    bd->pos->bitBoard[colour][OCCUPIED] &= clearMask[from];
-    bd->pos->bitBoard[colour][prom] |= setMask[to];
-    bd->pos->bitBoard[colour][OCCUPIED] |= setMask[to];
-    bd->pos->bitBoard[colour ^ 1][OCCUPIED] &= clearMask[to];
-    bd->pos->bitBoard[colour ^ 1][PAWN] &= clearMask[to];
-    bd->pos->bitBoard[colour ^ 1][KNIGHT] &= clearMask[to];
-    bd->pos->bitBoard[colour ^ 1][BISHOP] &= clearMask[to];
-    bd->pos->bitBoard[colour ^ 1][ROOK] &= clearMask[to];
-    bd->pos->bitBoard[colour ^ 1][QUEEN] &= clearMask[to];
+    bd->pos->bitBoard[colour][PAWN] &= g_clearMask[from];
+    bd->pos->bitBoard[colour][OCCUPIED] &= g_clearMask[from];
+    bd->pos->bitBoard[colour][prom] |= g_setMask[to];
+    bd->pos->bitBoard[colour][OCCUPIED] |= g_setMask[to];
+    bd->pos->bitBoard[colour ^ 1][OCCUPIED] &= g_clearMask[to];
+    bd->pos->bitBoard[colour ^ 1][PAWN] &= g_clearMask[to];
+    bd->pos->bitBoard[colour ^ 1][KNIGHT] &= g_clearMask[to];
+    bd->pos->bitBoard[colour ^ 1][BISHOP] &= g_clearMask[to];
+    bd->pos->bitBoard[colour ^ 1][ROOK] &= g_clearMask[to];
+    bd->pos->bitBoard[colour ^ 1][QUEEN] &= g_clearMask[to];
     return;
 }
 
@@ -959,7 +959,7 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
            P found at i.
          */
         iRank = RANK(i);
-        jtemp = pawn_attacks[colour][i];
+        jtemp = g_pawn_attacks[colour][i];
         j = tzcount(jtemp);
         /*
            Find attacked squares (for captures) first.
@@ -969,7 +969,7 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
             /*
                Attack square found at j.
              */
-            if ((bd->pos->bitBoard[colour ^ 1][OCCUPIED] & setMask[j]) != 0) {
+            if ((bd->pos->bitBoard[colour ^ 1][OCCUPIED] & g_setMask[j]) != 0) {
                 /*
                    Not empty or occupied by a friendly unit.
                  */
@@ -1019,7 +1019,7 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
                 }
             }
 
-            jtemp &= clearMask[j];
+            jtemp &= g_clearMask[j];
             j = tzcount(jtemp);
         }
 
@@ -1029,11 +1029,11 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
         occupied =
             (bd->pos->bitBoard[colour][OCCUPIED] | bd->
              pos->bitBoard[colour ^ 1][OCCUPIED]);
-        jtemp = pawn_moves[colour][i];
+        jtemp = g_pawn_moves[colour][i];
         j = tzcount(jtemp);
 
         while (j < 64) {
-            if ((occupied & setMask[j]) == 0) {
+            if ((occupied & g_setMask[j]) == 0) {
                 /*
                    Unoccupied square.
                  */
@@ -1041,7 +1041,7 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
                     /*
                        Black double step.
                      */
-                    if ((occupied & setMask[j + 8]) == 0) {
+                    if ((occupied & g_setMask[j + 8]) == 0) {
                         /*
                            Single-step square empty, so move ok.
                          */
@@ -1061,7 +1061,7 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
                     /*
                        White double step.
                      */
-                    if ((occupied & setMask[j - 8]) == 0) {
+                    if ((occupied & g_setMask[j - 8]) == 0) {
                         /*
                            Single-step square empty, so move ok.
                          */
@@ -1118,11 +1118,11 @@ void generatePawnMoves(BOARD* bd, enum COLOUR colour, BOARDLIST* bl)
                 }
             }
 
-            jtemp &= clearMask[j];
+            jtemp &= g_clearMask[j];
             j = tzcount(jtemp);
         }
 
-        temp &= clearMask[i];
+        temp &= g_clearMask[i];
         i = tzcount(temp);
     }
 

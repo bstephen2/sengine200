@@ -8,20 +8,21 @@
  */
 
 
+#include <omp.h>
 #include "sengine.h"
 
 static const int knightsq[] = { -17, -15, -10, -6, 6, 10, 15, 17 };
 static const int bishopsq[] = { -9, -7, 7, 9 };
 static const int rooksq[] = { -8, -1, 1, 8 };
 
-BITBOARD setMask[64];
-BITBOARD clearMask[64];
-BITBOARD king_attacks[64];
-BITBOARD knight_attacks[64];
-BITBOARD bishop_attacks[64];
-BITBOARD rook_attacks[64];
-BITBOARD pawn_attacks[2][64];
-BITBOARD pawn_moves[2][64];
+extern BITBOARD g_setMask[64];
+extern BITBOARD g_clearMask[64];
+extern BITBOARD g_king_attacks[64];
+extern BITBOARD g_knight_attacks[64];
+extern BITBOARD g_bishop_attacks[64];
+extern BITBOARD g_rook_attacks[64];
+extern BITBOARD g_pawn_attacks[2][64];
+extern BITBOARD g_pawn_moves[2][64];
 BBOARD rook_commonAttacks[64][64];
 BBOARD bishop_commonAttacks[64][64];
 uint64_t hash_added;
@@ -30,7 +31,6 @@ uint64_t board_del;
 uint64_t boardlist_del;
 uint64_t position_del;
 
-static void init_masks(void);
 static void init_kingattacks(void);
 static void init_knightattacks(void);
 static void init_bishopattacks(void);
@@ -108,24 +108,46 @@ static bool isRookEdge(int dir, int pos)
 
 void init(void)
 {
-    init_masks();
-    init_kingattacks();
-    init_knightattacks();
-    init_bishopattacks();
-    init_bishopcommonattacks();
-    init_rookattacks();
-    init_rookcommonattacks();
-    init_pawnmoves();
-    return;
-}
+    # pragma omp parallel
+    {
+        # pragma omp sections
+        {
+            # pragma omp section
+            {
+                init_kingattacks();
+            }
+            # pragma omp section
+            {
+                init_knightattacks();
+            }
+            # pragma omp section
+            {
+                init_bishopattacks();
+            }
+            # pragma omp section
+            {
+                init_rookattacks();
+            }
+            # pragma omp section
+            {
+                init_pawnmoves();
+            }
+        }
+    }
 
-static void init_masks(void)
-{
-    int i;
-
-    for (i = 0; i < 64; i++) {
-        setMask[i] = (BITBOARD) 1 << i;
-        clearMask[i] = ~setMask[i];
+    # pragma omp parallel
+    {
+        # pragma omp sections
+        {
+            # pragma omp section
+            {
+                init_bishopcommonattacks();
+            }
+            # pragma omp section
+            {
+                init_rookcommonattacks();
+            }
+        }
     }
 
     return;
@@ -134,12 +156,11 @@ static void init_masks(void)
 static void init_kingattacks(void)
 {
     int i, j;
-    (void) memset(king_attacks, '\0', sizeof(BITBOARD) * 64);
 
     for (i = 0; i < 64; i++) {
         for (j = 0; j < 64; j++) {
             if (distance(i, j) == 1) {
-                king_attacks[i] = king_attacks[i] | setMask[j];
+                g_king_attacks[i] = g_king_attacks[i] | g_setMask[j];
             }
         }
     }
@@ -150,7 +171,6 @@ static void init_kingattacks(void)
 static void init_knightattacks(void)
 {
     int i, j;
-    (void) memset(knight_attacks, '\0', sizeof(BITBOARD) * 64);
 
     for (i = 0; i < 64; i++) {
         int frank = RANK(i);
@@ -170,7 +190,7 @@ static void init_knightattacks(void)
                 continue;
             }
 
-            knight_attacks[i] = knight_attacks[i] | setMask[sq];
+            g_knight_attacks[i] = g_knight_attacks[i] | g_setMask[sq];
         }
     }
 
@@ -180,7 +200,6 @@ static void init_knightattacks(void)
 static void init_bishopattacks(void)
 {
     int i, j;
-    (void) memset(bishop_attacks, '\0', sizeof(BITBOARD) * 64);
 
     for (i = 0; i < 64; i++) {
         int iFile = FILE(i);
@@ -207,12 +226,12 @@ static void init_bishopattacks(void)
 
             int pos = i + inc;
             assert((pos >= 0) && (pos <= 63));
-            bishop_attacks[i] |= setMask[pos];
+            g_bishop_attacks[i] |= g_setMask[pos];
 
             while (isEdge(pos) == false) {
                 pos = pos + inc;
                 assert((pos >= 0) && (pos <= 63));
-                bishop_attacks[i] |= setMask[pos];
+                g_bishop_attacks[i] |= g_setMask[pos];
             }
         }
     }
@@ -228,7 +247,7 @@ static void init_bishopcommonattacks(void)
     for (i = 0; i < 64; i++) {
         for (j = 0; j < 64; j++) {
             if (i != j) {
-                if ((bishop_attacks[i] & setMask[j]) != 0) {
+                if ((g_bishop_attacks[i] & g_setMask[j]) != 0) {
                     int a = meson_min(i, j);
                     int b = meson_max(i, j);
                     BITBOARD temp = 0;
@@ -240,7 +259,7 @@ static void init_bishopcommonattacks(void)
                         a += 7;
 
                         while (a != b) {
-                            temp |= setMask[a];
+                            temp |= g_setMask[a];
                             a += 7;
                         }
                     } else {
@@ -250,7 +269,7 @@ static void init_bishopcommonattacks(void)
                         a += 9;
 
                         while (a != b) {
-                            temp |= setMask[a];
+                            temp |= g_setMask[a];
                             a += 9;
                         }
                     }
@@ -268,7 +287,6 @@ static void init_bishopcommonattacks(void)
 static void init_rookattacks(void)
 {
     int i, j;
-    (void) memset(rook_attacks, '\0', sizeof(BITBOARD) * 64);
 
     for (i = 0; i < 64; i++) {
         int iFile = FILE(i);
@@ -294,11 +312,11 @@ static void init_rookattacks(void)
             }
 
             int pos = i + inc;
-            rook_attacks[i] |= setMask[pos];
+            g_rook_attacks[i] |= g_setMask[pos];
 
             while (isRookEdge(inc, pos) == false) {
                 pos = pos + inc;
-                rook_attacks[i] |= setMask[pos];
+                g_rook_attacks[i] |= g_setMask[pos];
             }
         }
     }
@@ -318,18 +336,18 @@ static void init_rookcommonattacks(void)
                     /*
                        Horizontal line
                      */
-                    BITBOARD temp = rook_attacks[i] & rook_attacks[j];
+                    BITBOARD temp = g_rook_attacks[i] & g_rook_attacks[j];
                     int a = meson_min(i, j);
                     int b = meson_max(i, j);
 
                     while (FILE(a) != 0) {
                         a--;
-                        temp &= clearMask[a];
+                        temp &= g_clearMask[a];
                     }
 
                     while (FILE(b) != 7) {
                         b++;
-                        temp &= clearMask[b];
+                        temp &= g_clearMask[b];
                     }
 
                     rook_commonAttacks[i][j].used = true;
@@ -338,18 +356,18 @@ static void init_rookcommonattacks(void)
                     /*
                        Vertical line
                      */
-                    BITBOARD temp = rook_attacks[i] & rook_attacks[j];
+                    BITBOARD temp = g_rook_attacks[i] & g_rook_attacks[j];
                     int a = meson_min(i, j);
                     int b = meson_max(i, j);
 
                     while (RANK(a) != 0) {
                         a = a - 8;
-                        temp &= clearMask[a];
+                        temp &= g_clearMask[a];
                     }
 
                     while (RANK(b) != 7) {
                         b = b + 8;
-                        temp &= clearMask[b];
+                        temp &= g_clearMask[b];
                     }
 
                     rook_commonAttacks[i][j].used = true;
@@ -371,8 +389,6 @@ static void init_pawnmoves(void)
     int iFile;
     int i;
     enum COLOUR c;
-    (void) memset(pawn_moves, '\0', sizeof(BITBOARD) * 2 * 64);
-    (void) memset(pawn_attacks, '\0', sizeof(BITBOARD) * 2 * 64);
 
     for (c = WHITE; c <= BLACK; c++) {
         if (c == WHITE) {
@@ -392,11 +408,11 @@ static void init_pawnmoves(void)
 
             if (c == WHITE) {
                 if (iFile != 0) {
-                    pawn_attacks[c][i] |= setMask[i + leftCap];
+                    g_pawn_attacks[c][i] |= g_setMask[i + leftCap];
                 }
 
                 if (iFile != 7) {
-                    pawn_attacks[c][i] |= setMask[i + rightCap];
+                    g_pawn_attacks[c][i] |= g_setMask[i + rightCap];
                 }
             }
         }
@@ -406,11 +422,11 @@ static void init_pawnmoves(void)
 
             if (c == BLACK) {
                 if (iFile != 0) {
-                    pawn_attacks[c][i] |= setMask[i + leftCap];
+                    g_pawn_attacks[c][i] |= g_setMask[i + leftCap];
                 }
 
                 if (iFile != 7) {
-                    pawn_attacks[c][i] |= setMask[i + rightCap];
+                    g_pawn_attacks[c][i] |= g_setMask[i + rightCap];
                 }
             }
         }
@@ -420,21 +436,21 @@ static void init_pawnmoves(void)
             int iRank = RANK(i);
 
             if (iFile != 0) {
-                pawn_attacks[c][i] |= setMask[i + leftCap];
+                g_pawn_attacks[c][i] |= g_setMask[i + leftCap];
             }
 
             if (iFile != 7) {
-                pawn_attacks[c][i] |= setMask[i + rightCap];
+                g_pawn_attacks[c][i] |= g_setMask[i + rightCap];
             }
 
-            pawn_moves[c][i] |= setMask[i + firstStep];
+            g_pawn_moves[c][i] |= g_setMask[i + firstStep];
 
             if ((c == WHITE) && (iRank == 1)) {
-                pawn_moves[c][i] |= setMask[i + secondStep];
+                g_pawn_moves[c][i] |= g_setMask[i + secondStep];
             }
 
             if ((c == BLACK) && (iRank == 6)) {
-                pawn_moves[c][i] |= setMask[i + secondStep];
+                g_pawn_moves[c][i] |= g_setMask[i + secondStep];
             }
         }
     }

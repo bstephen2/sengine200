@@ -164,8 +164,8 @@ void getWmoveXML(BOARDLIST* wbl)
         assert(rc >= 0);
 
         ptr = toStr(brd);
-		  rc = xmlTextWriterWriteRaw(writer, BAD_CAST ptr);
-		  assert(rc >= 0);
+        rc = xmlTextWriterWriteRaw(writer, BAD_CAST ptr);
+        assert(rc >= 0);
         free(ptr);
         thList = brd->threat;
 
@@ -196,7 +196,7 @@ void xml_set(BOARDLIST* set_list)
     int rc;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Sets");
     assert(rc >= 0);
-	 getBmoveXML(set_list);
+    getBmoveXML(set_list);
     rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
     return;
@@ -207,7 +207,7 @@ void xml_tries(BOARDLIST* tries_list)
     int rc;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Tries");
     assert(rc >= 0);
-	 getWmoveXML(tries_list);
+    getWmoveXML(tries_list);
     rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 
@@ -219,7 +219,7 @@ void xml_keys(BOARDLIST* keys_list)
     int rc;
     rc = xmlTextWriterStartElement(writer, BAD_CAST "Keys");
     assert(rc >= 0);
-	 getWmoveXML(keys_list);
+    getWmoveXML(keys_list);
     rc = xmlTextWriterEndElement(writer);
     assert(rc >= 0);
 

@@ -74,6 +74,7 @@ bad_vkp			db				'sengine200: square in --kings duplicated in --pos', 0
 ;
 					%push       val_squares
 
+					align			16
 val_squares:	equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -155,6 +156,7 @@ vsq_99:			equ			$
 ;
 					%push       val_kings
 
+					align			16
 val_kings:		equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -218,6 +220,7 @@ vk_99:			equ			$
 ;
 					%push       val_gbr
 
+					align			16
 val_gbr:			equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -313,6 +316,7 @@ vg_99:			equ			$
 ;
 					%push       val_pos
 
+					align			16
 val_pos:			equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -352,6 +356,7 @@ vpo_99:			equ			$
 ;
 					%push       val_castling
 
+					align			16
 val_castling:	equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -417,6 +422,7 @@ vc_99:			equ			$
 ;
 					%push       val_ep
 
+					align			16
 val_ep:			equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -468,6 +474,7 @@ vp_100:			equ			$
 ;
 					%push       val_moves
 
+					align			16
 val_moves:		equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -512,6 +519,7 @@ vm_99:			equ			$
 ;
 					%push       val_sols
 
+					align			16
 val_sols:		equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -556,6 +564,7 @@ vs_99:			equ			$
 ;
 					%push       val_refuts
 
+					align			16
 val_refuts:		equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -601,23 +610,13 @@ vr_99:			equ			$
 					%push       val_threats
 
 
+					align			16
 val_threats:	equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
 					%local		rc:dword
 					enter       %$localsize, 0
 					SAVE			esi
-;            if (strcmp(ptr, "SHORTEST") == 0) {
-;                rc = 0;
-;                opt_threats = SHORTEST;
-;            } else if (strcmp(ptr, "NONE") == 0) {
-;                rc = 0;
-;                opt_threats = NONE;
-;            } else if (strcmp(ptr, "ALL") == 0) {
-;                rc = 0;
-;                opt_threats = ALL;
-;            }
-               
 					mov			esi, [g_st_threats]
 ;
 ;	Check for null pointer
@@ -691,6 +690,7 @@ vt_99:			equ			$
 ;
 					%push       val_kings_pos
 
+               align			16
 val_kings_pos:	equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
@@ -747,6 +747,7 @@ vkp_99:			equ			$
 ;
 ;	Check that the number of non-royal pieces defined by g_gbr equals the number of squares in g_pos
 ;
+               align			16
 val_gbr_pos:	equ         $
 					%stacksize  flat
 					%assign     %$localsize 0
