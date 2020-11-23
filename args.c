@@ -256,6 +256,11 @@ int process_args(int argc, char* argv[])
         fprintf(stderr, "%s--refuts only valid with --tries", SENGINE_ERROR_PREFIX);
     }
 
+    if ((g_hash == true) && (g_moves < 5)) {
+        rc++;
+        fprintf(stderr, "%s--hash only valid with --moves > 4", SENGINE_ERROR_PREFIX);
+    }
+
     if ((g_tries == true) && (g_refuts == 0)) {
         g_refuts = 1;
     }

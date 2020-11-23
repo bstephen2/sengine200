@@ -285,6 +285,10 @@ void xml_options()
     rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "actual", "%s", ptr);
     assert(rc >= 0);
 
+    ptr = (g_hash == true) ? on : off;
+    rc = xmlTextWriterWriteFormatElement(writer, BAD_CAST "hash", "%s", ptr);
+    assert(rc >= 0);
+
     switch (g_threats) {
     case ALL:
         ptr = all;

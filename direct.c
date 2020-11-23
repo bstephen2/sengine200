@@ -14,6 +14,7 @@ extern bool g_set;
 extern bool g_tries;
 extern bool g_actual;
 extern bool g_classify;
+extern bool g_hash;
 extern unsigned char g_sols;
 extern bool g_trivtries;
 extern enum SOUNDNESS sound;
@@ -635,7 +636,7 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
             wml = norm_final_move(m, g_moves);
             mateIn = wml->stipIn;
         } else {
-            if ((g_moves > 4) && ((move == 2) || (move == 3))) {
+            if ((g_hash == true) && (g_moves > 4) && ((move == 2) || (move == 3))) {
                 HASHVALUE* ptr;
                 ishash = true;
                 getHashKey(m, &kp);
