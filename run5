@@ -4,7 +4,6 @@ sengine200	--kings=a4b7\
 				--gbr=1481.08 \
 				--pos=a5e1h8c5e6b8h5c1b3c3c4c6c7e5f5h7 \
 				--moves=5 \
-				--hash \
 				--actual
 RC=$?
 set -

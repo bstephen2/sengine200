@@ -88,10 +88,6 @@ bool boardEquals(BOARD* ibd, BOARD* obd)
     assert(ibd != obd);
     assert(ibd->ply == obd->ply);
 
-#ifdef MOVESTAT
-    fprintf(stderr, "%d) boardEquals()\n", ibd->ply);
-#endif
-
     if (obd->mover != ibd->mover) {
         return false;
     }
@@ -130,10 +126,6 @@ bool deepEquals(BOARD* ibd, BOARD* obd)
     assert(ibd != NULL);
     assert(obd != NULL);
     assert(ibd->ply == obd->ply);
-
-#ifdef MOVESTAT
-    fprintf(stderr, "%d...deepEquals()\n", ibd->ply);
-#endif
 
     if (boardEquals(ibd, obd) == false) {
         return false;

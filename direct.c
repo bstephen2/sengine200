@@ -7,6 +7,7 @@
  *
  */
 
+#include <omp.h>
 #include "sengine.h"
 
 extern unsigned char g_moves;
@@ -751,31 +752,33 @@ static BOARDLIST* blackMove(BOARD* inBrd)
 
             freeBoardlist(bbl);
         }
-        ks = HASH_COUNT(killers);
+        /*
+                ks = HASH_COUNT(killers);
 
-        if (ks != 0) {
-            int rmax = 0;
-            KILLERKEY kmk;
-            KILLERHASHVALUE* cu;
-            KILLERHASHVALUE* tmp2;
-            BOARD* ab;
-            HASH_ITER(hh, killers, cu, tmp2) {
-                if (cu->count > rmax) {
-                    rmax = cu->count;
-                    kmk.kkey[0] = cu->kkey[0];
-                    kmk.kkey[1] = cu->kkey[1];
-                    kmk.kkey[2] = cu->kkey[2];
-                }
-            }
-            DL_FOREACH(bml->vektor, ab) {
-                KILLERKEY k;
-                getKillerHashKey(ab, &k);
+                if (ks != 0) {
+                    int rmax = 0;
+                    KILLERKEY kmk;
+                    KILLERHASHVALUE* cu;
+                    KILLERHASHVALUE* tmp2;
+                    BOARD* ab;
+                    HASH_ITER(hh, killers, cu, tmp2) {
+                        if (cu->count > rmax) {
+                            rmax = cu->count;
+                            kmk.kkey[0] = cu->kkey[0];
+                            kmk.kkey[1] = cu->kkey[1];
+                            kmk.kkey[2] = cu->kkey[2];
+                        }
+                    }
+                    DL_FOREACH(bml->vektor, ab) {
+                        KILLERKEY k;
+                        getKillerHashKey(ab, &k);
 
-                if (memcmp((void*) &k, (void*) & (kmk.kkey[0]), 3) == 0) {
-                    ab->killer = true;
+                        if (memcmp((void*) &k, (void*) & (kmk.kkey[0]), 3) == 0) {
+                            ab->killer = true;
+                        }
+                    }
                 }
-            }
-        }
+        		  */
 
         sortStrongBlackMoves(bml);
     }
@@ -786,9 +789,8 @@ static BOARDLIST* blackMove(BOARD* inBrd)
             char* stf = toSquare(b->from);
             char* stt = toSquare(b->to);
             (void) fprintf(stderr,
-            "   1...%c%s-%s (added = %u, hit null = %u, hit_list = %u)\n",
-            toPiece(b->mover), stf, stt, hash_added,
-            hash_hit_null, hash_hit_list);
+            "%2d)1...%c%s-%s\n",
+            omp_get_thread_num(), toPiece(b->mover), stf, stt);
             (void) fflush(stderr);
             free(stf);
             free(stt);
@@ -811,21 +813,23 @@ static BOARDLIST* blackMove(BOARD* inBrd)
             if ((b->mover != KING) && (b->check != true)
                     && (b->flights == 0)
                     && (b->captured == false)) {
-                KILLERKEY kk;
-                getKillerHashKey(b, &kk);
-                KILLERHASHVALUE* khv;
-                HASH_FIND(hh, killers, &kk, KILLERKEY_LEN, khv);
+                /*
+                                KILLERKEY kk;
+                                getKillerHashKey(b, &kk);
+                                KILLERHASHVALUE* khv;
+                                HASH_FIND(hh, killers, &kk, KILLERKEY_LEN, khv);
 
-                if (khv == NULL) {
-                    khv = getKillerHashValue();
-                    khv->kkey[0] = kk.kkey[0];
-                    khv->kkey[1] = kk.kkey[1];
-                    khv->kkey[2] = kk.kkey[2];
-                    khv->count = 0;
-                    HASH_ADD(hh, killers, kkey, KILLERKEY_LEN, khv);
-                } else {
-                    khv->count++;
-                }
+                                if (khv == NULL) {
+                                    khv = getKillerHashValue();
+                                    khv->kkey[0] = kk.kkey[0];
+                                    khv->kkey[1] = kk.kkey[1];
+                                    khv->kkey[2] = kk.kkey[2];
+                                    khv->count = 0;
+                                    HASH_ADD(hh, killers, kkey, KILLERKEY_LEN, khv);
+                                } else {
+                                    khv->count++;
+                                }
+                				*/
             }
 
             if (refuts > g_refuts) {
@@ -990,36 +994,60 @@ static BOARDLIST* norm_first_move(BOARD* brd)
     BOARD* b;
     BOARD* tmp;
     BOARD* tmp1;
+    BOARD* tempvektor[100];
     unsigned char minStip = NOSTIP;
     unsigned char maxStip = 0;
     bool stipAchieved = false;
     int ct;
+    int j = 0;
+	 int i;
     wml = generateWhiteBoardlist(brd, 1);
-    DL_FOREACH_SAFE(wml->vektor, b, tmp) {
+
+    DL_COUNT(wml->vektor, tmp, ct);
+
+    DL_FOREACH(wml->vektor, b) {
+        tempvektor[j] = b;
+        j++;
+    }
+
+    //	START OF PARALLEL BIT
+
+    #pragma omp parallel for
+
+    for (i = 0; i < ct; i++) {
+        BOARD* nb = tempvektor[i];
 #ifdef MOVESTAT
         {
-            char* from = toSquare(b->from);
-            char* to = toSquare(b->to);
+            char* from = toSquare(nb->from);
+            char* to = toSquare(nb->to);
 
             (void) fprintf(stderr,
-            "1.%c%s-%s (added = %u, hit_null = %u, hit_list = %u)\n",
-            toPiece(b->mover), from, to, hash_added, hash_hit_null,
-            hash_hit_list);
+                           "%2d)1.%c%s-%s\n",
+                           omp_get_thread_num(), toPiece(nb->mover), from, to);
             (void) fflush(stderr);
             free(from);
             free(to);
         }
 #endif
-        bml = blackMove(b);
-        assert(bml != NULL);
+        BOARDLIST* nbml =  blackMove(nb);
+        assert(nbml != NULL);
+        nb->nextply = nbml;
+    }
+
+    //	END OF PARALLEL BIT
+
+    DL_FOREACH_SAFE(wml->vektor, b, tmp) {
+        bml = b->nextply;
         DL_COUNT(bml->vektor, tmp1, ct);
 
         if ((ct == 0) && (b->check == false)) {
+            b->nextply = NULL;
             freeBoardlist(bml);
             DL_DELETE(wml->vektor, b);
             freeBoard(b);
             // Unwanted stalemate
         } else if (bml->stipIn == NOSTIP) {
+            b->nextply = NULL;
             // Not even a try
             freeBoardlist(bml);
             DL_DELETE(wml->vektor, b);
@@ -1028,37 +1056,16 @@ static BOARDLIST* norm_first_move(BOARD* brd)
             stipAchieved = true;
             b->tag = '?';
             putRefutsToEnd(bml);
-            b->nextply = bml;
             minStip = (bml->stipIn < minStip) ? bml->stipIn : minStip;
             maxStip = (bml->stipIn > maxStip) ? bml->stipIn : maxStip;
-            /*
-                     if ( g_threats != NONE ) {
-                        state = THREATS;
-                        BOARDLIST *uml = getBoardlist( WHITE, 1 );
-
-                        LL_APPEND( uml->vektor, b );
-                        calculateThreats( uml );
-                        state = TRIESKEYS;
-                     }
-            			*/
         } else {
             stipAchieved = true;
             b->tag = '!';
-            b->nextply = bml;
             minStip = (bml->stipIn < minStip) ? bml->stipIn : minStip;
             maxStip = (bml->stipIn > maxStip) ? bml->stipIn : maxStip;
-            /*
-                     if ( g_threats != NONE ) {
-                        state = THREATS;
-                        BOARDLIST *uml = getBoardlist( WHITE, 1 );
-
-                        LL_APPEND( uml->vektor, b );
-                        calculateThreats( uml );
-                        state = TRIESKEYS;
-                     }
-            			*/
         }
     }
+
 
     if (stipAchieved == true) {
         wml->minStip = minStip;
@@ -1096,13 +1103,6 @@ static void weedNonDefences(BOARDLIST* threats, BOARDLIST* bbl, bool fleck)
     if ((fleck == true) && (bbl->moveNumber == 1)) {
         DL_FOREACH_SAFE(bbl->vektor, bm, tmp) {
             if (bm->mover != KING) {
-#ifdef MOVESTAT
-
-                if (bbl->moveNumber == 1) {
-                    fprintf(stderr, "WeedNonDefences %d...\n", bbl->moveNumber);
-                }
-
-#endif
                 wbl = bm->nextply;
 
                 if (wbl != NULL) {
@@ -1126,11 +1126,6 @@ static void weedNonDefences(BOARDLIST* threats, BOARDLIST* bbl, bool fleck)
     } else {
         DL_FOREACH_SAFE(bbl->vektor, bm, tmp) {
             if (bm->mover != KING) {
-#ifdef MOVESTAT
-
-                fprintf(stderr, "%d... WeedNonDefences\n", bbl->moveNumber);
-
-#endif
                 wbl = bm->nextply;
 
                 if (wbl != NULL) {
@@ -1138,13 +1133,6 @@ static void weedNonDefences(BOARDLIST* threats, BOARDLIST* bbl, bool fleck)
                     DL_FOREACH(threats->vektor, tm) {
                         DL_FOREACH(wbl->vektor, wm) {
                             if (deepEquals(wm, tm) == true) {
-#ifdef MOVESTAT
-
-                                if (bbl->moveNumber == 1) {
-                                    fputs("TO_WEED\n", stderr);
-                                }
-
-#endif
                                 c++;
                             }
                         }

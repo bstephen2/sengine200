@@ -49,10 +49,6 @@ bool bListEquals(BOARDLIST* ibl, BOARDLIST* obl)
     //assert(obl->vektor != NULL);
     //assert(ibl->vektor != NULL);
 
-#ifdef MOVESTAT
-    fprintf(stderr, "%d bListEquals()\n", ibl->moveNumber);
-#endif
-
     DL_COUNT(ibl->vektor, tmp, counti);
     DL_COUNT(obl->vektor, tmp1, counto);
 
