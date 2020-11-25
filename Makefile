@@ -12,7 +12,7 @@ RELEASE	=	-O3 -DNDEBUG
 DEBUG		=	-g -O0 
 INCLIB	=	-I/usr/include/libxml2
 HASHDEFS	=	-DHASH_FUNCTION=HASH_OAT
-CFLAGS	=	${DEBUG} ${HASHDEFS} ${INCLIB} -DMOVESTAT -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
+CFLAGS	=	${RELEASE} ${HASHDEFS} ${INCLIB} -DDISABLE_MEMORY_POOLING -DMOVESTAT -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
 LDFLAGS	=	-o${EXE} -fopenmp
 IND		=	astyle
 INDOPTS	=	--style=kr --align-pointer=type --indent=tab=3 --indent=spaces \

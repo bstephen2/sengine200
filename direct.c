@@ -630,6 +630,8 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
         sortStrongBlackMoves(bml);
     }
 
+    bool toBreak = false;
+    bool toContinue = false;
     DL_FOREACH(bml->vektor, m) {
         qualifyMove(bml, m);
 
@@ -638,29 +640,36 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
             mateIn = wml->stipIn;
         } else {
             if ((g_hash == true) && (g_moves > 4) && ((move == 2) || (move == 3))) {
-                HASHVALUE* ptr;
-                ishash = true;
-                getHashKey(m, &kp);
-                HASH_FIND(hh, transtable, &kp, MD5_LEN, ptr);
+                #pragma omp critical
+                {
+                    HASHVALUE* ptr;
+                    ishash = true;
+                    getHashKey(m, &kp);
+                    HASH_FIND(hh, transtable, &kp, MD5_LEN, ptr);
 
-                if (ptr != NULL) {
-                    if (ptr->cont == NULL) {
-                        refutationFound = true;
-                        hash_hit_null++;
-                        break;
+                    if (ptr != NULL) {
+                        if (ptr->cont == NULL) {
+                            refutationFound = true;
+                            hash_hit_null++;
+                            toBreak = true;
+                        } else {
+                            hash_hit_list++;
+                            ptr->cont->use_count++;
+                            mateIn = ptr->cont->stipIn;
+                            minStip = (mateIn < minStip) ? mateIn : minStip;
+                            maxStip = (mateIn > maxStip) ? mateIn : maxStip;
+                            m->nextply = ptr->cont;
+                            toContinue = true;
+                        }
                     } else {
-                        hash_hit_list++;
-                        ptr->cont->use_count++;
-                        mateIn = ptr->cont->stipIn;
-                        minStip = (mateIn < minStip) ? mateIn : minStip;
-                        maxStip = (mateIn > maxStip) ? mateIn : maxStip;
-                        m->nextply = ptr->cont;
-                        continue;
+                        wml = norm_whiteMidMove(m, move + 1);
+                        mateIn = wml->stipIn;
                     }
-                } else {
-                    wml = norm_whiteMidMove(m, move + 1);
-                    mateIn = wml->stipIn;
                 }
+
+                if (toBreak == true) break;
+
+                if (toContinue == true) continue;
             } else {
                 wml = norm_whiteMidMove(m, move + 1);
                 mateIn = wml->stipIn;
@@ -673,24 +682,30 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
             wml = NULL;
 
             if (ishash == true) {
-                HASHVALUE* hv = getHashValue();
-                hv->cont = NULL;
-                (void) memcpy((void*) hv->hashkey, (void*) & (kp.hashkey),
-                              MD5_LEN);
-                HASH_ADD(hh, transtable, hashkey, MD5_LEN, hv);
-                hash_added++;
+                #pragma omp critical
+                {
+                    HASHVALUE* hv = getHashValue();
+                    hv->cont = NULL;
+                    (void) memcpy((void*) hv->hashkey, (void*) & (kp.hashkey),
+                    MD5_LEN);
+                    HASH_ADD(hh, transtable, hashkey, MD5_LEN, hv);
+                    hash_added++;
+                }
             }
 
             break;
         } else {
             if (ishash == true) {
-                HASHVALUE* hv = getHashValue();
-                hv->cont = wml;
-                wml->use_count++;
-                (void) memcpy((void*) hv->hashkey, (void*) & (kp.hashkey),
-                              MD5_LEN);
-                HASH_ADD(hh, transtable, hashkey, MD5_LEN, hv);
-                hash_added++;
+                #pragma omp critical
+                {
+                    HASHVALUE* hv = getHashValue();
+                    hv->cont = wml;
+                    wml->use_count++;
+                    (void) memcpy((void*) hv->hashkey, (void*) & (kp.hashkey),
+                    MD5_LEN);
+                    HASH_ADD(hh, transtable, hashkey, MD5_LEN, hv);
+                    hash_added++;
+                }
             }
 
             minStip = (mateIn < minStip) ? mateIn : minStip;
@@ -752,33 +767,34 @@ static BOARDLIST* blackMove(BOARD* inBrd)
 
             freeBoardlist(bbl);
         }
-        /*
-                ks = HASH_COUNT(killers);
+        #pragma omp critical
+        {
+            ks = HASH_COUNT(killers);
 
-                if (ks != 0) {
-                    int rmax = 0;
-                    KILLERKEY kmk;
-                    KILLERHASHVALUE* cu;
-                    KILLERHASHVALUE* tmp2;
-                    BOARD* ab;
-                    HASH_ITER(hh, killers, cu, tmp2) {
-                        if (cu->count > rmax) {
-                            rmax = cu->count;
-                            kmk.kkey[0] = cu->kkey[0];
-                            kmk.kkey[1] = cu->kkey[1];
-                            kmk.kkey[2] = cu->kkey[2];
-                        }
-                    }
-                    DL_FOREACH(bml->vektor, ab) {
-                        KILLERKEY k;
-                        getKillerHashKey(ab, &k);
-
-                        if (memcmp((void*) &k, (void*) & (kmk.kkey[0]), 3) == 0) {
-                            ab->killer = true;
-                        }
+            if (ks != 0) {
+                int rmax = 0;
+                KILLERKEY kmk;
+                KILLERHASHVALUE* cu;
+                KILLERHASHVALUE* tmp2;
+                BOARD* ab;
+                HASH_ITER(hh, killers, cu, tmp2) {
+                    if (cu->count > rmax) {
+                        rmax = cu->count;
+                        kmk.kkey[0] = cu->kkey[0];
+                        kmk.kkey[1] = cu->kkey[1];
+                        kmk.kkey[2] = cu->kkey[2];
                     }
                 }
-        		  */
+                DL_FOREACH(bml->vektor, ab) {
+                    KILLERKEY k;
+                    getKillerHashKey(ab, &k);
+
+                    if (memcmp((void*) &k, (void*) & (kmk.kkey[0]), 3) == 0) {
+                        ab->killer = true;
+                    }
+                }
+            }
+        }
 
         sortStrongBlackMoves(bml);
     }
@@ -813,23 +829,24 @@ static BOARDLIST* blackMove(BOARD* inBrd)
             if ((b->mover != KING) && (b->check != true)
                     && (b->flights == 0)
                     && (b->captured == false)) {
-                /*
-                                KILLERKEY kk;
-                                getKillerHashKey(b, &kk);
-                                KILLERHASHVALUE* khv;
-                                HASH_FIND(hh, killers, &kk, KILLERKEY_LEN, khv);
+                #pragma omp critical
+                {
+                    KILLERKEY kk;
+                    getKillerHashKey(b, &kk);
+                    KILLERHASHVALUE* khv;
+                    HASH_FIND(hh, killers, &kk, KILLERKEY_LEN, khv);
 
-                                if (khv == NULL) {
-                                    khv = getKillerHashValue();
-                                    khv->kkey[0] = kk.kkey[0];
-                                    khv->kkey[1] = kk.kkey[1];
-                                    khv->kkey[2] = kk.kkey[2];
-                                    khv->count = 0;
-                                    HASH_ADD(hh, killers, kkey, KILLERKEY_LEN, khv);
-                                } else {
-                                    khv->count++;
-                                }
-                				*/
+                    if (khv == NULL) {
+                        khv = getKillerHashValue();
+                        khv->kkey[0] = kk.kkey[0];
+                        khv->kkey[1] = kk.kkey[1];
+                        khv->kkey[2] = kk.kkey[2];
+                        khv->count = 0;
+                        HASH_ADD(hh, killers, kkey, KILLERKEY_LEN, khv);
+                    } else {
+                        khv->count++;
+                    }
+                }
             }
 
             if (refuts > g_refuts) {
@@ -1000,7 +1017,7 @@ static BOARDLIST* norm_first_move(BOARD* brd)
     bool stipAchieved = false;
     int ct;
     int j = 0;
-	 int i;
+    int i;
     wml = generateWhiteBoardlist(brd, 1);
 
     DL_COUNT(wml->vektor, tmp, ct);
