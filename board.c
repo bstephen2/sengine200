@@ -1406,7 +1406,7 @@ char* toStr(BOARD* bd)
             tp[1] = '\0';
             (void) strcat(ret, tp);
 
-            if (bd->qualifier != '\0') {
+            if (bd->qualifier[0] != '\0') {
                 (void) strcat(ret, bd->qualifier);
             }
 

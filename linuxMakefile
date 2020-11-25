@@ -1,38 +1,38 @@
 # Sengine200
-# Cygwin64 version
-BITS		=	64
-EXE			=	sengine200
+# LINUX32 version
+BITS		=	32
+EXE		=	sengine200
 AS			=	nasm
-ADEBUG		=	-g
+ADEBUG	=	-g -Fdwarf
 ARELEASE	=	#-O3
-AFLAGS		=	-f win${BITS} ${ADEBUG} ${ARELEASE} -g
+AFLAGS	=	-f elf${BITS} ${DEBUG} ${RELEASE} -g
 CC			=	gcc
 LD			=	gcc
-RELEASE		=	-O3 -DNDEBUG
+RELEASE	=	-O3 -DNDEBUG
 DEBUG		=	-g -O0 
-INCLIB		=	-I/usr/include/libxml2
+INCLIB	=	-I/usr/include/libxml2
 HASHDEFS	=	-DHASH_FUNCTION=HASH_OAT
-CFLAGS		=	${DEBUG} ${HASHDEFS} ${INCLIB} -DDISABLE_MEMORY_POOLING -DMOVESTAT -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
-LDFLAGS		=	-o${EXE} -fopenmp
-IND			=	astyle
-INDOPTS		=	--style=kr --align-pointer=type --indent=tab=3 --indent=spaces \
+CFLAGS	=	${RELEASE} ${HASHDEFS} ${INCLIB} -DDISABLE_MEMORY_POOLING -DMOVESTAT -c -fopenmp -mtune=native -m${BITS} -Wall -std=gnu11
+LDFLAGS	=	-o${EXE} -fopenmp
+IND		=	astyle
+INDOPTS	=	--style=kr --align-pointer=type --indent=tab=3 --indent=spaces \
 				--pad-oper --unpad-paren --break-blocks \
 				--pad-header
-POOLHDS		=	pool.h
+POOLHDS	=	pool.h
 POOLMODS	=	pool.c
 POOLOBJS	=	pool.o
 POOLASMS	=	pool.asm
-MD5HDS		=	md5.h
-MD5MODS		=	md5.c
-MD5OBJS		=	md5.o
-MD5ASMS		=	md5.asm
+MD5HDS	=	md5.h
+MD5MODS	=	md5.c
+MD5OBJS	=	md5.o
+MD5ASMS	=	md5.asm
 CHDS		=	sengine.h
 CMODS		=	main.c args.c memory.c xml.c init.c board.c boardlist.c direct.c
 COBJS		=	main.o args.o memory.o xml.o init.o board.o boardlist.o direct.o
 CASMS		=	main.asm args.asm memory.asm xml.asm init.asm board.asm boardlist.asm direct.asm
-AHDS		=	seng64.inc
-AMODS		=	glob64.asm val64.asm init64.asm
-AOBJS		=	glob64.o val64.o init64.o
+AHDS		=	sengine.inc
+AMODS		=	globals.asm vals.asm asminit.asm
+AOBJS		=	globals.o vals.o asminit.o
 LIBS		=	-lxml2
 
 sengine200:	${COBJS} ${AOBJS} ${POOLOBJS} ${MD5OBJS}
@@ -79,14 +79,14 @@ md5.o:	md5.c ${POOLHDS}
 	${CC} ${CFLAGS} md5.c
 	objconv -fnasm md5.o
 
-glob64.o:	glob64.asm ${AHDS}
-	${AS} ${AFLAGS} -l glob64.lst -o glob64.o glob64.asm
+globals.o:	globals.asm ${AHDS}
+	${AS} ${AFLAGS} -l globals.lst globals.asm
 
-val64.o:	val64.asm ${AHDS}
-	${AS} ${AFLAGS} -l val64.lst -o val64.o val64.asm
+vals.o:	vals.asm ${AHDS}
+	${AS} ${AFLAGS} -l vals.lst vals.asm
 
-init64.o:	init64.asm ${AHDS}
-	${AS} ${AFLAGS} -l init64.lst -o init64.o init64.asm
+asminit.o:	asminit.asm ${AHDS}
+	${AS} ${AFLAGS} -l asminit.lst asminit.asm
 
 tags:	${CMODS} ${CHDS}
 	ctags ${CMODS} ${CHDS}
