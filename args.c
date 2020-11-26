@@ -12,42 +12,42 @@
 #include <string.h>
 #include "sengine.h"
 
-extern char* g_kings;
-extern char* g_gbr;
-extern char* g_pos;
-extern char* g_castling;
-extern char* g_ep;
-extern char* g_st_moves;
-extern char* g_st_sols;
-extern char* g_st_refuts;
-extern char* g_st_threats;
-extern char g_moves;
-extern char g_sols;
-extern char g_refuts;
-extern enum THREATS g_threats;
-extern bool	g_hash;
-extern bool	g_help;
-extern bool	g_set;
-extern bool	g_tries;
-extern bool	g_trivtries;
-extern bool	g_actual;
-extern bool	g_shortvars;
-extern bool	g_fleck;
-extern bool	g_meson;
-extern bool	g_classify;
-extern bool	g_version;
+char* g_kings = NULL;
+char* g_gbr = NULL;
+char* g_pos = NULL;
+char* g_castling = NULL;
+char* g_ep = NULL;
+char* g_st_moves = NULL;
+char* g_st_sols = NULL;
+char* g_st_refuts = NULL;
+char* g_st_threats = NULL;
+unsigned char g_moves = 2;
+unsigned char g_sols = 1;
+unsigned char g_refuts = 0;
+enum THREATS g_threats = SHORTEST;
+bool g_hash = false;
+bool g_help = false;
+bool g_set = false;
+bool g_tries = false;
+bool g_trivtries = false;
+bool g_actual = false;
+bool g_shortvars = false;
+bool g_fleck = false;
+bool g_meson = false;
+bool g_classify = false;
+bool g_version = false;
 
-int val_kings();
-int val_gbr();
-int val_pos();
+int val_kings(char*);
+int val_gbr(char*);
+int val_pos(char*);
 int val_castling(char*);
 int val_ep(char*);
 int val_moves(char*);
 int val_sols(char*);
 int val_refuts(char*);
 int val_threats(char*);
-int val_gbr_pos();
-int val_kings_pos();
+int val_gbr_pos(char*, char*);
+int val_kings_pos(char*, char*);
 
 void do_usage(void)
 {
@@ -219,32 +219,44 @@ int process_args(int argc, char* argv[])
     if (rc == 0) {
         if (g_kings == NULL) {
             fprintf(stderr, "%s--kings is mandatory\n", SENGINE_ERROR_PREFIX);
-            rc = 1;
+            rc++;
         }
 
         if (g_gbr == NULL) {
             fprintf(stderr, "%s--gbr is mandatory\n", SENGINE_ERROR_PREFIX);
-            rc = 1;
+            rc++;
         }
 
         if (g_pos == NULL) {
             fprintf(stderr, "%s--pos is mandatory\n", SENGINE_ERROR_PREFIX);
-            rc = 1;
+            rc++;
         }
     }
 
-    if (g_kings != NULL) rc += val_kings();
+    if ((g_kings != NULL) && (val_kings(g_kings) != 0)) {
+        fprintf(stderr, "%s--kings=%s is invalid\n", SENGINE_ERROR_PREFIX, g_kings);
+        rc++;
+    }
 
-    if (g_gbr != NULL) rc += val_gbr();
+    if ((g_gbr != NULL) && (val_gbr(g_gbr) != 0)) {
+        fprintf(stderr, "%s--gbr=%s is invalid\n", SENGINE_ERROR_PREFIX, g_gbr);
+        rc++;
+    }
 
-    if (g_pos != NULL) rc += val_pos();
+    if ((g_pos != NULL) && (val_pos(g_pos) != 0)) {
+        fprintf(stderr, "%s--pos=%s is invalid\n", SENGINE_ERROR_PREFIX, g_pos);
+        rc++;
+    }
 
-    rc += val_castling(g_castling);
-    rc += val_ep(g_ep);
-    rc += val_moves(g_st_moves);
-    rc += val_sols(g_st_sols);
-    rc += val_refuts(g_st_refuts);
-    rc += val_threats(g_st_threats);
+    if ((g_castling != NULL) && (val_castling(g_castling) != 0)) {
+        fprintf(stderr, "%s--castling=%s is invalid\n", SENGINE_ERROR_PREFIX, g_castling);
+        rc++;
+    }
+
+    //rc += val_ep(g_ep);
+    //rc += val_moves(g_st_moves);
+    //rc += val_refuts(g_st_refuts);
+    //rc += val_threats(g_st_threats);king
 
     if ((g_fleck == true) && (g_threats == NONE)) {
         rc++;
@@ -266,9 +278,9 @@ int process_args(int argc, char* argv[])
     }
 
     if (g_pos != NULL) {
-        if (g_gbr != NULL) rc += val_gbr_pos();
+        //if (g_gbr != NULL) rc += val_gbr_pos(g_gbr, g_pos);
 
-        if (g_kings != NULL) rc += val_kings_pos();
+        //if (g_kings != NULL) rc += val_kings_pos(g_kings, g_pos);
     }
 
     if (rc != 0) {

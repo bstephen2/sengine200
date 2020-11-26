@@ -37,7 +37,7 @@ LIBS		=	-lxml2
 
 sengine200:	${COBJS} ${AOBJS} ${POOLOBJS} ${MD5OBJS}
 	${LD}   ${LDFLAGS} ${COBJS} ${AOBJS} ${POOLOBJS} ${MD5OBJS} ${LIBS}
-	cp ${EXE} ${HOME}/bin/${EXE}
+	cp ${EXE} /usr/bin/${EXE}
 
 main.o:	main.c ${CHDS}
 	${CC} ${CFLAGS} main.c

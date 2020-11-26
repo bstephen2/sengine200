@@ -21,7 +21,7 @@
 #define CV "?.?"
 #endif
 
-#define SENGINE_PLATFORM "LINUX32"
+#define SENGINE_PLATFORM "WIN64"
 #define SENGINE_PROG_NAME "Sengine"
 #define SENGINE_PROG_VERSION "2.00"
 #define SENGINE_PROG_AUTHOR "Brian Stephenson"

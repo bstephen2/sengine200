@@ -7,6 +7,7 @@
 ; *
 ; */
 
+					DEFAULT		REL
 TRUE				EQU			1
 FALSE				EQU			0
 THR_ALL				EQU			0
@@ -27,7 +28,7 @@ THR_SHORTEST		EQU			2
 					%endrep
 %endmacro
 
-%macro				ABS	2
+%macro				BDS_ABS	2
 					mov	%2, %1
 					add	%2, %2
 					sbb	%2, %2

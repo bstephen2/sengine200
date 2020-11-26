@@ -647,7 +647,8 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
                     getHashKey(m, &kp);
                     HASH_FIND(hh, transtable, &kp, MD5_LEN, ptr);
 
-                    if (ptr != NULL) {
+                    if (ptr != NULL)
+                    {
                         if (ptr->cont == NULL) {
                             refutationFound = true;
                             hash_hit_null++;
@@ -661,7 +662,8 @@ static BOARDLIST* norm_blackMidMove(BOARD* inBrd, int move)
                             m->nextply = ptr->cont;
                             toContinue = true;
                         }
-                    } else {
+                    } else
+                    {
                         wml = norm_whiteMidMove(m, move + 1);
                         mateIn = wml->stipIn;
                     }
@@ -836,14 +838,16 @@ static BOARDLIST* blackMove(BOARD* inBrd)
                     KILLERHASHVALUE* khv;
                     HASH_FIND(hh, killers, &kk, KILLERKEY_LEN, khv);
 
-                    if (khv == NULL) {
+                    if (khv == NULL)
+                    {
                         khv = getKillerHashValue();
                         khv->kkey[0] = kk.kkey[0];
                         khv->kkey[1] = kk.kkey[1];
                         khv->kkey[2] = kk.kkey[2];
                         khv->count = 0;
                         HASH_ADD(hh, killers, kkey, KILLERKEY_LEN, khv);
-                    } else {
+                    } else
+                    {
                         khv->count++;
                     }
                 }

@@ -10,12 +10,11 @@
 
 					%include		'seng64.inc'
 
-					[section    .data]
+					[section    	.data]
 					;  Initialised data.
 
-					[section 	.bss]
+dummy:				db				1
+
+					[section 		.bss]
 					;  Uninitialised data.
-
-					[section 	.text]
-
 
